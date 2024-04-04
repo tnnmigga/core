@@ -10,7 +10,7 @@ type IModule interface {
 	MQ() chan any
 	Run()
 	Stop()
-	RegisterHandler(mType reflect.Type, handler *Handler)
+	RegisterHandler(mType reflect.Type, handler any)
 	Before(state ServerState, hook func() error)
 	After(state ServerState, hook func() error)
 	Hook(state ServerState, stage int) []func() error

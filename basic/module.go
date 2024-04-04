@@ -18,7 +18,7 @@ const (
 type Module struct {
 	name      string
 	mq        chan any
-	handlers  map[reflect.Type]*idef.Handler
+	handlers  map[reflect.Type]any
 	hooks     [idef.ServerStateExit + 1][2][]func() error
 	closeSign chan struct{}
 }
@@ -27,7 +27,7 @@ func New(name string, mqLen int32) *Module {
 	m := &Module{
 		name:      name,
 		mq:        make(chan any, mqLen),
-		handlers:  map[reflect.Type]*idef.Handler{},
+		handlers:  map[reflect.Type]any{},
 		closeSign: make(chan struct{}, 1),
 	}
 	msgbus.RegisterHandler(m, m.onRPCRequest)
@@ -51,7 +51,7 @@ func (m *Module) Assign(msg any) {
 	}
 }
 
-func (m *Module) RegisterHandler(mType reflect.Type, handler *idef.Handler) {
+func (m *Module) RegisterHandler(mType reflect.Type, handler any) {
 	_, ok := m.handlers[mType]
 	if ok {
 		// 一个module内一个msg只能被注册一次, 但不同模块可以分别注册监听同一个消息
@@ -102,7 +102,11 @@ func (m *Module) cb(msg any) {
 		zlog.Errorf("handler not exist %v", msgType)
 		return
 	}
-	h.Cb(msg)
+	fn, ok := h.(func(any))
+	if !ok {
+		zlog.Errorf("%s %s cb type error", m.name, util.TypeName(msg))
+	}
+	fn(msg)
 }
 
 func (m *Module) onRPCRequest(msg *idef.RPCRequest) {
@@ -117,7 +121,11 @@ func (m *Module) onRPCRequest(msg *idef.RPCRequest) {
 		msg.Err <- fmt.Errorf("rpc handler not found %v", msgType)
 		return
 	}
-	h.RPC(msg.Req, func(v any) {
+	fn, ok := h.(func(any, func(any), func(error)))
+	if !ok {
+		zlog.Errorf("%s %s rpc type error", m.name, util.TypeName(msg))
+	}
+	fn(msg.Req, func(v any) {
 		msg.Resp <- v
 	}, func(err error) {
 		msg.Err <- err
