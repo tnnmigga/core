@@ -2,10 +2,11 @@ package core
 
 import (
 	"context"
-	"nett/util"
-	"nett/zlog"
 	"sync"
 	"time"
+
+	"github.com/tnnmigga/nett/util"
+	"github.com/tnnmigga/nett/zlog"
 )
 
 var (

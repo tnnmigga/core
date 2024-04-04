@@ -1,12 +1,13 @@
 package util
 
 import (
-	"nett/util/idgen"
-	"nett/zlog"
 	"reflect"
 	"runtime"
 	"runtime/debug"
 	"strings"
+
+	"github.com/tnnmigga/nett/util/idgen"
+	"github.com/tnnmigga/nett/zlog"
 )
 
 func RecoverPanic() {

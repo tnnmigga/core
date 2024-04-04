@@ -1,17 +1,18 @@
-package fw
+package nett
 
 import (
 	"fmt"
-	"nett/conf"
-	"nett/core"
-	"nett/idef"
-	"nett/infra/link"
-	"nett/util"
-	"nett/zlog"
 	"os"
 	"runtime/debug"
 	"sync"
 	"time"
+
+	"github.com/tnnmigga/nett/conf"
+	"github.com/tnnmigga/nett/core"
+	"github.com/tnnmigga/nett/idef"
+	"github.com/tnnmigga/nett/infra/link"
+	"github.com/tnnmigga/nett/util"
+	"github.com/tnnmigga/nett/zlog"
 )
 
 type Server struct {

@@ -3,10 +3,11 @@ package redis
 import (
 	"context"
 	"errors"
-	"nett/core"
-	"nett/msgbus"
-	"nett/util"
 	"time"
+
+	"github.com/tnnmigga/nett/core"
+	"github.com/tnnmigga/nett/msgbus"
+	"github.com/tnnmigga/nett/util"
 
 	"github.com/go-redis/redis/v8"
 )

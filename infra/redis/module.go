@@ -2,10 +2,11 @@ package redis
 
 import (
 	"context"
-	"nett/basic"
-	"nett/conf"
-	"nett/idef"
 	"time"
+
+	"github.com/tnnmigga/nett/basic"
+	"github.com/tnnmigga/nett/conf"
+	"github.com/tnnmigga/nett/idef"
 
 	"github.com/go-redis/redis/v8"
 )

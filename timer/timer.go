@@ -3,12 +3,13 @@ package timer
 import (
 	"context"
 	"fmt"
-	"nett/algorithm"
-	"nett/core"
-	"nett/idef"
-	"nett/msgbus"
-	"nett/util"
-	"nett/util/idgen"
+
+	"github.com/tnnmigga/nett/algorithm"
+	"github.com/tnnmigga/nett/core"
+	"github.com/tnnmigga/nett/idef"
+	"github.com/tnnmigga/nett/msgbus"
+	"github.com/tnnmigga/nett/util"
+	"github.com/tnnmigga/nett/util/idgen"
 
 	"time"
 )

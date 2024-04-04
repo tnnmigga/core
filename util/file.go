@@ -2,8 +2,9 @@ package util
 
 import (
 	"io"
-	"nett/zlog"
 	"os"
+
+	"github.com/tnnmigga/nett/zlog"
 )
 
 func ReadFile(name string) []byte {

@@ -2,10 +2,11 @@ package mongo
 
 import (
 	"context"
-	"nett/core"
-	"nett/msgbus"
-	"nett/zlog"
 	"time"
+
+	"github.com/tnnmigga/nett/core"
+	"github.com/tnnmigga/nett/msgbus"
+	"github.com/tnnmigga/nett/zlog"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"

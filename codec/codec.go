@@ -5,9 +5,10 @@ import (
 	"errors"
 	"fmt"
 	"log"
-	"nett/util"
-	"nett/zlog"
 	"reflect"
+
+	"github.com/tnnmigga/nett/util"
+	"github.com/tnnmigga/nett/zlog"
 
 	"github.com/gogo/protobuf/proto"
 	"go.mongodb.org/mongo-driver/bson"

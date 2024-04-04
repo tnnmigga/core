@@ -3,12 +3,13 @@ package link
 import (
 	"errors"
 	fmt "fmt"
-	"nett/codec"
-	"nett/conf"
-	"nett/core"
-	"nett/idef"
-	"nett/msgbus"
-	"nett/zlog"
+
+	"github.com/tnnmigga/nett/codec"
+	"github.com/tnnmigga/nett/conf"
+	"github.com/tnnmigga/nett/core"
+	"github.com/tnnmigga/nett/idef"
+	"github.com/tnnmigga/nett/msgbus"
+	"github.com/tnnmigga/nett/zlog"
 
 	"github.com/nats-io/nats.go"
 )

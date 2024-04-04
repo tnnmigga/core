@@ -1,9 +1,10 @@
 package idgen
 
 import (
-	"nett/conf"
 	"sync"
 	"time"
+
+	"github.com/tnnmigga/nett/conf"
 )
 
 var uuidgen UUIDGenerater

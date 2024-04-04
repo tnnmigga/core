@@ -1,9 +1,10 @@
 package msgbus
 
 import (
-	"nett/idef"
-	"nett/util"
 	"time"
+
+	"github.com/tnnmigga/nett/idef"
+	"github.com/tnnmigga/nett/util"
 )
 
 type castOpt struct {

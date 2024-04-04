@@ -2,9 +2,10 @@ package zlog
 
 import (
 	"fmt"
-	"nett/conf"
 	"strings"
 	"time"
+
+	"github.com/tnnmigga/nett/conf"
 
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"

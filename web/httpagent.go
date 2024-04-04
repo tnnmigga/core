@@ -4,10 +4,11 @@ import (
 	"context"
 	"errors"
 	"net/http"
-	"nett/core"
-	"nett/zlog"
 	"runtime/debug"
 	"time"
+
+	"github.com/tnnmigga/nett/core"
+	"github.com/tnnmigga/nett/zlog"
 
 	"github.com/gin-gonic/gin"
 )

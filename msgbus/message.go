@@ -3,12 +3,13 @@ package msgbus
 import (
 	"errors"
 	"fmt"
-	"nett/conf"
-	"nett/core"
-	"nett/idef"
-	"nett/util"
-	"nett/zlog"
 	"time"
+
+	"github.com/tnnmigga/nett/conf"
+	"github.com/tnnmigga/nett/core"
+	"github.com/tnnmigga/nett/idef"
+	"github.com/tnnmigga/nett/util"
+	"github.com/tnnmigga/nett/zlog"
 
 	"reflect"
 )

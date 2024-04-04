@@ -2,11 +2,12 @@ package mongo
 
 import (
 	"context"
-	"nett/basic"
-	"nett/conf"
-	"nett/idef"
-	"nett/infra"
 	"time"
+
+	"github.com/tnnmigga/nett/basic"
+	"github.com/tnnmigga/nett/conf"
+	"github.com/tnnmigga/nett/idef"
+	"github.com/tnnmigga/nett/infra"
 
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
