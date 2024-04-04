@@ -5,9 +5,9 @@ import (
 	"errors"
 	"time"
 
-	"github.com/tnnmigga/nett/core"
-	"github.com/tnnmigga/nett/msgbus"
-	"github.com/tnnmigga/nett/util"
+	"tnnmigga/nett/core"
+	"tnnmigga/nett/msgbus"
+	"tnnmigga/nett/util"
 
 	"github.com/go-redis/redis/v8"
 )

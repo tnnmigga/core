@@ -1,4 +1,4 @@
-module github.com/tnnmigga/nett
+module tnnmigga/nett
 
 go 1.21.4
 

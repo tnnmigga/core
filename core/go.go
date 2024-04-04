@@ -5,8 +5,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/tnnmigga/nett/util"
-	"github.com/tnnmigga/nett/zlog"
+	"tnnmigga/nett/util"
+	"tnnmigga/nett/zlog"
 )
 
 var (

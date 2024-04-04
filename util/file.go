@@ -4,7 +4,7 @@ import (
 	"io"
 	"os"
 
-	"github.com/tnnmigga/nett/zlog"
+	"tnnmigga/nett/zlog"
 )
 
 func ReadFile(name string) []byte {

@@ -4,9 +4,9 @@ import (
 	"context"
 	"time"
 
-	"github.com/tnnmigga/nett/core"
-	"github.com/tnnmigga/nett/msgbus"
-	"github.com/tnnmigga/nett/zlog"
+	"tnnmigga/nett/core"
+	"tnnmigga/nett/msgbus"
+	"tnnmigga/nett/zlog"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
