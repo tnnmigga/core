@@ -37,7 +37,12 @@ func (d *MessageDescriptor) New() any {
 	return reflect.New(d.ReflectType).Interface()
 }
 
-func Register(v any) {
+func Register[T any](msg ...T) {
+	if len(msg) == 0 {
+		var tmp T
+		msg = append(msg, tmp)
+	}
+	v := msg[0]
 	name := util.TypeName(v)
 	id := util.TypeID(v)
 	if desc, has := msgIDToDesc[id]; has {
