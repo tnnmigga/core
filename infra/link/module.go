@@ -40,7 +40,7 @@ func New() idef.IModule {
 	m := &module{
 		Module: basic.New(infra.ModNameLink, conf.Int32("nats.mq-len", basic.DefaultMQLen)),
 	}
-	codec.Register((*RPCResult)(nil))
+	codec.Register[*RPCResult]()
 	m.initHandler()
 	m.After(idef.ServerStateInit, m.afterInit)
 	m.After(idef.ServerStateRun, m.afterRun)

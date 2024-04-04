@@ -37,12 +37,14 @@ func (d *MessageDescriptor) New() any {
 	return reflect.New(d.ReflectType).Interface()
 }
 
-func Register[T any](msg ...T) {
-	if len(msg) == 0 {
+// 将消息注册到解码器
+// 可以通过指定泛型类型和参数传递类型
+func Register[T any](t ...T) {
+	if len(t) == 0 {
 		var tmp T
-		msg = append(msg, tmp)
+		t = append(t, tmp)
 	}
-	v := msg[0]
+	v := t[0]
 	name := util.TypeName(v)
 	id := util.TypeID(v)
 	if desc, has := msgIDToDesc[id]; has {
@@ -61,6 +63,8 @@ func Register[T any](msg ...T) {
 	}
 }
 
+// 编码
+// 额外拼接四字节类型id
 func Encode(v any) []byte {
 	msgID := util.TypeID(v)
 	bytes := Marshal(v)
@@ -70,6 +74,9 @@ func Encode(v any) []byte {
 	return body
 }
 
+// 解码
+// 使用前需要提前注册
+// 需要头部四字节为类型id
 func Decode(b []byte) (msg any, err error) {
 	if len(b) < 4 {
 		return nil, fmt.Errorf("message decode len error %d", len(b))
@@ -84,6 +91,7 @@ func Decode(b []byte) (msg any, err error) {
 	return msg, err
 }
 
+// 序列化
 func Marshal(v any) []byte {
 	if v0, ok := v.(proto.Message); ok {
 		b, err := proto.Marshal(v0)
@@ -99,6 +107,8 @@ func Marshal(v any) []byte {
 	return b
 }
 
+// 反序列化
+// 使用前需要提前注册
 func Unmarshal(b []byte, addr any) error {
 	switch marshalType(addr) {
 	case marshalTypeGogoproto:

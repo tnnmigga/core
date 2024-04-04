@@ -6,14 +6,13 @@ import (
 
 	"github.com/tnnmigga/nett/codec"
 	"github.com/tnnmigga/nett/idef"
-	"github.com/tnnmigga/nett/util"
 	"github.com/tnnmigga/nett/zlog"
 )
 
 func RegisterHandler[T any](m idef.IModule, fn func(T)) {
-	mValue := util.New[T]()
-	mType := reflect.TypeOf(mValue)
-	codec.Register(mValue)
+	var tmp T
+	mType := reflect.TypeOf(tmp)
+	codec.Register[T]()
 	registerRecver(mType, m)
 	m.RegisterHandler(mType, func(data any) {
 		msg := data.(T)
@@ -22,9 +21,9 @@ func RegisterHandler[T any](m idef.IModule, fn func(T)) {
 }
 
 func RegisterRPC[T any](m idef.IModule, fn func(msg T, resolve func(any), reject func(error))) {
-	mValue := util.New[T]()
-	mType := reflect.TypeOf(mValue)
-	codec.Register(mValue)
+	var tmp T
+	mType := reflect.TypeOf(tmp)
+	codec.Register[T]()
 	registerRecver(mType, m)
 	m.RegisterHandler(mType, func(data any, res func(any), rej func(error)) {
 		msg := data.(T)
