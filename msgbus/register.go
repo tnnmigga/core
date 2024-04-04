@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"reflect"
 
-	"tnnmigga/nett/codec"
-	"tnnmigga/nett/idef"
-	"tnnmigga/nett/util"
-	"tnnmigga/nett/zlog"
+	"github.com/tnnmigga/nett/codec"
+	"github.com/tnnmigga/nett/idef"
+	"github.com/tnnmigga/nett/util"
+	"github.com/tnnmigga/nett/zlog"
 )
 
 func RegisterHandler[T any](m idef.IModule, fn func(T)) {

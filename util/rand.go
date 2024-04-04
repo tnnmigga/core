@@ -3,8 +3,8 @@ package util
 import (
 	"math/rand"
 
-	"tnnmigga/nett/algorithm"
-	"tnnmigga/nett/zlog"
+	"github.com/tnnmigga/nett/algorithm"
+	"github.com/tnnmigga/nett/zlog"
 
 	"golang.org/x/exp/constraints"
 )

@@ -3,10 +3,10 @@ package eventbus
 import (
 	"strconv"
 
-	"tnnmigga/nett/idef"
-	"tnnmigga/nett/msgbus"
-	"tnnmigga/nett/util"
-	"tnnmigga/nett/zlog"
+	"github.com/tnnmigga/nett/idef"
+	"github.com/tnnmigga/nett/msgbus"
+	"github.com/tnnmigga/nett/util"
+	"github.com/tnnmigga/nett/zlog"
 )
 
 type ISubscriber interface {

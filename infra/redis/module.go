@@ -4,9 +4,9 @@ import (
 	"context"
 	"time"
 
-	"tnnmigga/nett/basic"
-	"tnnmigga/nett/conf"
-	"tnnmigga/nett/idef"
+	"github.com/tnnmigga/nett/basic"
+	"github.com/tnnmigga/nett/conf"
+	"github.com/tnnmigga/nett/idef"
 
 	"github.com/go-redis/redis/v8"
 )

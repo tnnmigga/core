@@ -5,7 +5,7 @@ import (
 	"strings"
 	"time"
 
-	"tnnmigga/nett/conf"
+	"github.com/tnnmigga/nett/conf"
 
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"

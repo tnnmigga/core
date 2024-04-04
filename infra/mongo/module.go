@@ -4,10 +4,10 @@ import (
 	"context"
 	"time"
 
-	"tnnmigga/nett/basic"
-	"tnnmigga/nett/conf"
-	"tnnmigga/nett/idef"
-	"tnnmigga/nett/infra"
+	"github.com/tnnmigga/nett/basic"
+	"github.com/tnnmigga/nett/conf"
+	"github.com/tnnmigga/nett/idef"
+	"github.com/tnnmigga/nett/infra"
 
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"

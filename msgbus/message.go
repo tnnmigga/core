@@ -5,11 +5,11 @@ import (
 	"fmt"
 	"time"
 
-	"tnnmigga/nett/conf"
-	"tnnmigga/nett/core"
-	"tnnmigga/nett/idef"
-	"tnnmigga/nett/util"
-	"tnnmigga/nett/zlog"
+	"github.com/tnnmigga/nett/conf"
+	"github.com/tnnmigga/nett/core"
+	"github.com/tnnmigga/nett/idef"
+	"github.com/tnnmigga/nett/util"
+	"github.com/tnnmigga/nett/zlog"
 
 	"reflect"
 )
