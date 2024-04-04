@@ -1,7 +1,6 @@
 import os
 import sys
 
-include = ''
 source = ''
 insertTxt = '''
 import "gogoproto/gogo.proto";
@@ -62,12 +61,8 @@ if __name__ == '__main__':
         key, value = arg.split("=")
         if key == "source":
             source = value
-        if key == "include":
-            include = value
     if source == '':
         print("path is empty")
         exit()
-    if include == '':    
-        include = source
     gogoFile()
     print("generated successfully".format(source))
