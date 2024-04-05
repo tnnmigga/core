@@ -3,6 +3,7 @@ package conf
 import (
 	"encoding/json"
 	"errors"
+	"log"
 	"regexp"
 	"strings"
 
@@ -21,21 +22,20 @@ func LoadFromJSON(b []byte) {
 	tmp := map[string]any{}
 	err := json.Unmarshal(b, &tmp)
 	if err != nil {
-		panic(err)
+		log.Fatalf("LoadFromJSON unmarshal error %v", err)
 	}
 	transform(tmp, confs, nil)
 	afterLoad()
 }
 
-func LoadFromYAML(b []byte) error {
+func LoadFromYAML(b []byte) {
 	tmp := map[string]any{}
 	err := yaml.Unmarshal(b, &tmp)
 	if err != nil {
-		return err
+		log.Fatalf("LoadFromYAML unmarshal error %v", err)
 	}
 	transform(tmp, confs, nil)
 	afterLoad()
-	return nil
 }
 
 func uncomment(b []byte) []byte {

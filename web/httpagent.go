@@ -31,7 +31,7 @@ func NewHttpAgent() *HttpAgent {
 		defer func() {
 			if r := recover(); r != nil {
 				zlog.Errorf("%v: %s", r, debug.Stack())
-				ctx.String(http.StatusInternalServerError, "server panic")
+				ctx.String(http.StatusInternalServerError, "internal error")
 			}
 		}()
 		ctx.Next()
