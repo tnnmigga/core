@@ -28,7 +28,7 @@ func (m *module) onMongoSave(req *MongoSave) {
 		m := mongo.NewReplaceOneModel().SetFilter(op.Filter).SetReplacement(b).SetUpsert(true)
 		ms = append(ms, m)
 	}
-	core.GoWithGroup(req.Key(), func() {
+	core.GoWithGroup(req.GroupKey, func() {
 		m.semaphore.P()
 		defer m.semaphore.V()
 		ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
@@ -41,7 +41,7 @@ func (m *module) onMongoSave(req *MongoSave) {
 }
 
 func (m *module) onMongoLoad(req *MongoLoad, resolve func(any), reject func(error)) {
-	core.GoWithGroup(req.Key(), func() {
+	core.GoWithGroup(req.GroupKey, func() {
 		m.semaphore.P()
 		defer m.semaphore.V()
 		cur, _ := m.mongoCli.Database(req.DBName).Collection(req.CollName).Find(context.Background(), req.Filter)

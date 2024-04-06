@@ -1,6 +1,7 @@
 package nett
 
 import (
+	"flag"
 	"fmt"
 	"os"
 	"runtime/debug"
@@ -15,6 +16,14 @@ import (
 	"github.com/tnnmigga/nett/zlog"
 )
 
+func init() {
+	var config string
+	flag.StringVar(&config, "c", "configs.jsonc", "配置文件名")
+	flag.Parse()
+	conf.LoadFromJSON(util.ReadFile(config))
+	zlog.Init()
+}
+
 type Server struct {
 	modules []idef.IModule
 	wg      *sync.WaitGroup
@@ -27,19 +36,17 @@ func NewServer(modules ...idef.IModule) *Server {
 	}
 	server.modules = append(server.modules, link.New()) // nats最后停止
 	server.modules = append(server.modules, modules...)
-	server.init()
-	server.run()
+	server.onInit()
+	server.onRun()
 	return server
 }
 
-func (s *Server) init() {
-	conf.LoadFromJSON(util.ReadFile("configs.jsonc"))
-	zlog.Init()
+func (s *Server) onInit() {
 	zlog.Info("server initialization")
 	s.after(idef.ServerStateInit, s.abort)
 }
 
-func (s *Server) run() {
+func (s *Server) onRun() {
 	s.before(idef.ServerStateRun, s.abort)
 	zlog.Info("server try to run")
 	for _, m := range s.modules {
@@ -49,7 +56,7 @@ func (s *Server) run() {
 	s.after(idef.ServerStateRun, s.abort)
 }
 
-func (s *Server) stop() {
+func (s *Server) onStop() {
 	s.before(idef.ServerStateStop, s.noabort)
 	zlog.Info("server try to stop")
 	s.waitMsgHandling(time.Minute)
@@ -60,14 +67,14 @@ func (s *Server) stop() {
 	}
 	s.wg.Wait()
 	zlog.Info("server stoped successfully")
-	s.exit()
+	s.onExit()
 }
 
 func (s *Server) Exit() {
-	s.stop()
+	s.onStop()
 }
 
-func (s *Server) exit() {
+func (s *Server) onExit() {
 	s.before(idef.ServerStateExit, s.noabort)
 	zlog.Info("server close")
 	os.Exit(0)

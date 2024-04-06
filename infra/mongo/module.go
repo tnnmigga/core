@@ -5,7 +5,6 @@ import (
 	"time"
 
 	"github.com/tnnmigga/nett/basic"
-	"github.com/tnnmigga/nett/conf"
 	"github.com/tnnmigga/nett/core"
 	"github.com/tnnmigga/nett/idef"
 
@@ -14,16 +13,20 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/readpref"
 )
 
+const MaxConcurrency = 0xFF
+
 type module struct {
 	*basic.Module
 	semaphore *core.Semaphore // 控制并发数
 	mongoCli  *mongo.Client   // mongo
+	mongoURI  string
 }
 
-func New(name string) idef.IModule {
+func New(name, uri string) idef.IModule {
 	m := &module{
 		Module:    basic.New(name, basic.DefaultMQLen),
-		semaphore: core.NewSemaphore(conf.Int("mongo.max_concurrency", 0xFF)),
+		semaphore: core.NewSemaphore(MaxConcurrency),
+		mongoURI:  uri,
 	}
 	m.registerHandler()
 	m.Before(idef.ServerStateRun, m.beforeRun)
@@ -34,7 +37,7 @@ func New(name string) idef.IModule {
 func (m *module) beforeRun() (err error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
-	m.mongoCli, err = mongo.Connect(ctx, options.Client().ApplyURI(conf.String("mongo.url", "mongodb://localhost")))
+	m.mongoCli, err = mongo.Connect(ctx, options.Client().ApplyURI(m.mongoURI))
 	if err != nil {
 		return err
 	}

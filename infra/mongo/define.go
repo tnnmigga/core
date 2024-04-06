@@ -1,8 +1,6 @@
 package mongo
 
 import (
-	"fmt"
-
 	"go.mongodb.org/mongo-driver/bson"
 )
 
@@ -11,23 +9,21 @@ type MongoSaveOp struct {
 	Value  any
 }
 
+// 保存至MongoDB
+// GroupKey为保证并发时的时序
 type MongoSave struct {
+	GroupKey string
 	DBName   string
 	CollName string
 	Ops      []*MongoSaveOp
 }
 
-func (m *MongoSave) Key() string {
-	return fmt.Sprintf("%s-%s", m.DBName, m.CollName)
-}
-
+// 从MongoDB加载数据
+// GroupKey为保证并发时的时序
 type MongoLoad struct {
+	GroupKey string
 	DBName   string
 	CollName string
 	Filter   bson.M
 	Data     any
-}
-
-func (m *MongoLoad) Key() string {
-	return fmt.Sprintf("%s-%s", m.DBName, m.CollName)
 }
