@@ -41,6 +41,8 @@ type IRecver interface {
 
 // 跨进程投递消息
 func Cast(msg any, opts ...castOpt) {
+	// 跨协程传递消息默认深拷贝防止并发修改
+	msg = deepcopy.Copy(msg)
 	// 如果不指定serverID则默认投递到本地
 	serverID := findCastOpt[uint32](opts, idef.ConstKeyServerID, conf.ServerID)
 	if serverID == conf.ServerID {
@@ -67,8 +69,6 @@ func Cast(msg any, opts ...castOpt) {
 // 投递到本地其他协程
 // 跨进程投递靠本地link模块转发
 func castLocal(msg any, opts ...castOpt) {
-	// 跨协程传递消息默认深拷贝防止并发修改
-	msg = deepcopy.Copy(msg)
 	recvs, ok := recvers[reflect.TypeOf(msg)]
 	if !ok {
 		zlog.Errorf("message cast recv not fuound %v", util.TypeName(msg))
@@ -92,6 +92,8 @@ func Broadcast(serverType string, msg any) {
 }
 
 func RPC[T any](m idef.IModule, serverID uint32, req any, cb func(resp T, err error)) {
+	// 跨协程传递消息默认深拷贝防止并发修改
+	req = deepcopy.Copy(req)
 	if serverID == conf.ServerID {
 		localCall(m, req, warpCb(cb))
 		return
