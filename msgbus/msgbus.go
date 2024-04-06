@@ -41,20 +41,24 @@ type IRecver interface {
 
 // 跨进程投递消息
 func Cast(msg any, opts ...castOpt) {
-	msg = deepcopy.Copy(msg) // 跨协程传递消息，深拷贝防止并发修改
+	// 跨协程传递消息默认深拷贝防止并发修改
+	msg = deepcopy.Copy(msg)
 	// 如果不指定serverID则默认投递到本地
 	serverID := findCastOpt[uint32](opts, idef.ConstKeyServerID, conf.ServerID)
 	if serverID == conf.ServerID {
 		castLocal(msg, opts...)
 		return
 	}
-	if nonuse := findCastOpt[bool](opts, idef.ConstKeyNonuseStream, false); nonuse { // 不使用流
+	// 检查是否不使用stream
+	if nonuse := findCastOpt[bool](opts, idef.ConstKeyNonuseStream, false); nonuse {
+		// 不使用stream
 		castLocal(&idef.CastPackage{
 			ServerID: serverID,
 			Body:     msg,
 		}, opts...)
 		return
 	}
+	// 默认使用stream
 	castLocal(&idef.StreamCastPackage{
 		ServerID: serverID,
 		Body:     msg,
