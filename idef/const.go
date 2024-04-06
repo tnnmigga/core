@@ -3,10 +3,10 @@ package idef
 type ServerState int
 
 const (
-	ServerStateInit ServerState = iota // 初始化
-	ServerStateRun                     // 运行
-	ServerStateStop                    // 停止
-	ServerStateExit                    // 进程退出
+	ServerStateInit ServerState = iota // 进程启动后初始化模块/日志/配置等工作
+	ServerStateRun                     // 运行各个模块
+	ServerStateStop                    // 停止各个模块
+	ServerStateExit                    // 进程退出阶段
 )
 
 const (
