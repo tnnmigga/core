@@ -17,7 +17,7 @@ type module struct {
 	mysqlDSN  string
 }
 
-func New(name, dsn string) idef.IModule {
+func New(name idef.ModName, dsn string) idef.IModule {
 	m := &module{
 		Module:    basic.New(name, basic.DefaultMQLen),
 		semaphore: core.NewSemaphore(MaxConcurrency),

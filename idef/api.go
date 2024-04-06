@@ -5,7 +5,7 @@ import (
 )
 
 type IModule interface {
-	Name() string
+	Name() ModName
 	Assign(any)
 	MQ() chan any
 	Run()

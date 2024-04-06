@@ -16,3 +16,9 @@ const (
 	ConstKeyServerID     = "server-id"
 	ConstKeyExpires      = "expires"
 )
+
+type ModName string
+
+const (
+	ModLink ModName = "link"
+)

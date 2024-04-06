@@ -16,14 +16,14 @@ const (
 )
 
 type Module struct {
-	name      string
+	name      idef.ModName
 	mq        chan any
 	handlers  map[reflect.Type]any
 	hooks     [idef.ServerStateExit + 1][2][]func() error
 	closeSign chan struct{}
 }
 
-func New(name string, mqLen int32) *Module {
+func New(name idef.ModName, mqLen int32) *Module {
 	m := &Module{
 		name:      name,
 		mq:        make(chan any, mqLen),
@@ -35,7 +35,7 @@ func New(name string, mqLen int32) *Module {
 	return m
 }
 
-func (m *Module) Name() string {
+func (m *Module) Name() idef.ModName {
 	return m.name
 }
 

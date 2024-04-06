@@ -22,7 +22,7 @@ type module struct {
 	mongoURI  string
 }
 
-func New(name, uri string) idef.IModule {
+func New(name idef.ModName, uri string) idef.IModule {
 	m := &module{
 		Module:    basic.New(name, basic.DefaultMQLen),
 		semaphore: core.NewSemaphore(MaxConcurrency),

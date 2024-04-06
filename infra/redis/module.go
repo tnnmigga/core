@@ -5,7 +5,6 @@ import (
 	"time"
 
 	"github.com/tnnmigga/nett/basic"
-	"github.com/tnnmigga/nett/conf"
 	"github.com/tnnmigga/nett/idef"
 
 	"github.com/go-redis/redis/v8"
@@ -16,9 +15,14 @@ type module struct {
 	cli *redis.Client
 }
 
-func New() idef.IModule {
+func New(name idef.ModName, addr, username, password string) idef.IModule {
 	m := &module{
-		Module: basic.New("redis", basic.DefaultMQLen),
+		Module: basic.New(name, basic.DefaultMQLen),
+		cli: redis.NewClient(&redis.Options{
+			Addr:     addr,
+			Username: username,
+			Password: password,
+		}),
 	}
 	m.After(idef.ServerStateInit, m.afterInit)
 	return m
@@ -26,10 +30,6 @@ func New() idef.IModule {
 
 func (m *module) afterInit() error {
 	m.initHandler()
-	m.cli = redis.NewClient(&redis.Options{
-		Addr:     conf.String("redis.address", "localhost:6379"),
-		Password: conf.String("redis.password", ""),
-	})
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
 	_, err := m.cli.Ping(ctx).Result()

@@ -10,7 +10,6 @@ import (
 	"github.com/tnnmigga/nett/codec"
 	"github.com/tnnmigga/nett/conf"
 	"github.com/tnnmigga/nett/idef"
-	"github.com/tnnmigga/nett/infra"
 	"github.com/tnnmigga/nett/msgbus"
 	"github.com/tnnmigga/nett/util"
 	"github.com/tnnmigga/nett/zlog"
@@ -38,7 +37,7 @@ type module struct {
 
 func New() idef.IModule {
 	m := &module{
-		Module: basic.New(infra.ModNameLink, conf.Int32("nats.mq-len", basic.DefaultMQLen)),
+		Module: basic.New(idef.ModLink, conf.Int32("nats.mq-len", basic.DefaultMQLen)),
 	}
 	codec.Register[*RPCResult]()
 	m.initHandler()

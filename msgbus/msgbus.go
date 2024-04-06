@@ -35,7 +35,7 @@ func init() {
 }
 
 type IRecver interface {
-	Name() string
+	Name() idef.ModName
 	Assign(any)
 }
 
@@ -72,7 +72,7 @@ func castLocal(msg any, opts ...castOpt) {
 		zlog.Errorf("message cast recv not fuound %v", util.TypeName(msg))
 		return
 	}
-	modName := findCastOpt[string](opts, idef.ConstKeyOneOfMods, "")
+	modName := findCastOpt[idef.ModName](opts, idef.ConstKeyOneOfMods, "")
 	for _, recv := range recvs {
 		if modName != "" && modName != recv.Name() {
 			continue

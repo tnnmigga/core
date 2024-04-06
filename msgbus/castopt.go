@@ -28,7 +28,7 @@ func NonuseStream() castOpt {
 	}
 }
 
-func OneOfMods(modName string) castOpt {
+func OneOfMods(modName idef.ModName) castOpt {
 	return castOpt{
 		key:   idef.ConstKeyOneOfMods,
 		value: modName,
