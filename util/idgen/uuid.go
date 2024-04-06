@@ -27,7 +27,7 @@ func (idgen *UUIDGenerater) NewID() uint64 {
 	if idgen.index > 0x3FF {
 		panic("idgen uuid index over limit")
 	}
-	serverID := uint64(conf.ServerID())
+	serverID := uint64(conf.ServerID)
 	if serverID >= 0xFFF {
 		panic("UUIDGenerater.NewID server-id must be smaller than 4096")
 	}

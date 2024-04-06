@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/mohae/deepcopy"
 	"github.com/tnnmigga/nett/conf"
 	"github.com/tnnmigga/nett/core"
 	"github.com/tnnmigga/nett/idef"
@@ -38,26 +39,29 @@ type IRecver interface {
 	Assign(any)
 }
 
+// 跨进程投递消息
 func Cast(msg any, opts ...castOpt) {
-	serverID := findCastOpt[uint32](opts, idef.ConstKeyServerID, 0)
-	if serverID == conf.ServerID() {
-		CastLocal(msg, opts...)
+	msg = deepcopy.Copy(msg) // 跨协程传递消息，深拷贝防止并发修改
+	// 如果不指定serverID则默认投递到本地
+	serverID := findCastOpt[uint32](opts, idef.ConstKeyServerID, conf.ServerID)
+	if serverID == conf.ServerID {
+		castLocal(msg, opts...)
 	}
 	if nonuse := findCastOpt[bool](opts, idef.ConstKeyNonuseStream, false); nonuse { // 不使用流
-		CastLocal(&idef.CastPackage{
+		castLocal(&idef.CastPackage{
 			ServerID: serverID,
 			Body:     msg,
 		}, opts...)
 		return
 	}
-	CastLocal(&idef.StreamCastPackage{
+	castLocal(&idef.StreamCastPackage{
 		ServerID: serverID,
 		Body:     msg,
 		Header:   castHeader(opts),
 	}, opts...)
 }
 
-func CastLocal(msg any, opts ...castOpt) {
+func castLocal(msg any, opts ...castOpt) {
 	recvs, ok := recvers[reflect.TypeOf(msg)]
 	if !ok {
 		zlog.Errorf("message cast recv not fuound %v", util.TypeName(msg))
@@ -75,13 +79,13 @@ func CastLocal(msg any, opts ...castOpt) {
 func Broadcast(serverType string, msg any) {
 	pkg := &idef.BroadcastPackage{
 		ServerType: serverType,
-		Body:       msg,
+		Body:       deepcopy.Copy(msg),
 	}
-	CastLocal(pkg)
+	castLocal(pkg)
 }
 
 func RPC[T any](m idef.IModule, serverID uint32, req any, cb func(resp T, err error)) {
-	if serverID == conf.ServerID() {
+	if serverID == conf.ServerID {
 		localCall(m, req, warpCb(cb))
 		return
 	}
@@ -92,7 +96,7 @@ func RPC[T any](m idef.IModule, serverID uint32, req any, cb func(resp T, err er
 		Resp:     util.New[T](),
 		Cb:       warpCb(cb),
 	}
-	CastLocal(rpcCtx)
+	castLocal(rpcCtx)
 }
 
 func localCall(m idef.IModule, req any, cb func(resp any, err error)) {

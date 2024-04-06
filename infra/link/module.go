@@ -76,8 +76,8 @@ func (m *module) afterInit() error {
 
 func (m *module) afterRun() (err error) {
 	m.cons, err = m.stream.CreateOrUpdateConsumer(context.Background(), jetstream.ConsumerConfig{
-		Durable:       fmt.Sprintf("%s-%d", conf.ServerType(), conf.ServerID()),
-		FilterSubject: streamCastSubject(conf.ServerID()),
+		Durable:       fmt.Sprintf("%s-%d", conf.ServerType, conf.ServerID),
+		FilterSubject: streamCastSubject(conf.ServerID),
 	})
 	if err != nil {
 		return err
@@ -86,19 +86,19 @@ func (m *module) afterRun() (err error) {
 	if err != nil {
 		return err
 	}
-	m.castSub, err = m.conn.Subscribe(castSubject(conf.ServerID()), m.recv)
+	m.castSub, err = m.conn.Subscribe(castSubject(conf.ServerID), m.recv)
 	if err != nil {
 		return err
 	}
-	m.broadcastSub, err = m.conn.Subscribe(broadcastSubject(conf.ServerType()), m.recv)
+	m.broadcastSub, err = m.conn.Subscribe(broadcastSubject(conf.ServerType), m.recv)
 	if err != nil {
 		return err
 	}
-	m.queueSub, err = m.conn.QueueSubscribe(randomCastSubject(conf.ServerType()), conf.ServerType(), m.recv)
+	m.queueSub, err = m.conn.QueueSubscribe(randomCastSubject(conf.ServerType), conf.ServerType, m.recv)
 	if err != nil {
 		return err
 	}
-	m.rpcSub, err = m.conn.Subscribe(rpcSubject(conf.ServerID()), m.rpc)
+	m.rpcSub, err = m.conn.Subscribe(rpcSubject(conf.ServerID), m.rpc)
 	if err != nil {
 		return err
 	}
@@ -159,7 +159,7 @@ func (m *module) streamRecv(msg jetstream.Msg) {
 		zlog.Errorf("nats streamRecv decode msg error: %v", err)
 		return
 	}
-	msgbus.CastLocal(pkg)
+	msgbus.Cast(pkg)
 }
 
 func (m *module) recv(msg *nats.Msg) {
@@ -169,7 +169,7 @@ func (m *module) recv(msg *nats.Msg) {
 		zlog.Errorf("nats recv decode msg error: %v", err)
 		return
 	}
-	msgbus.CastLocal(pkg)
+	msgbus.Cast(pkg)
 }
 
 func (m *module) rpc(msg *nats.Msg) {
@@ -181,7 +181,7 @@ func (m *module) rpc(msg *nats.Msg) {
 		m.conn.Publish(msg.Reply, codec.Encode(rpcResp))
 		return
 	}
-	msgbus.RPC[any](m, conf.ServerID(), req, func(resp any, err error) {
+	msgbus.RPC[any](m, conf.ServerID, req, func(resp any, err error) {
 		if err != nil {
 			rpcResp.Err = err.Error()
 		} else {

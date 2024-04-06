@@ -29,8 +29,10 @@ func (m *module) onMongoSave(req *MongoSave) {
 		ms = append(ms, m)
 	}
 	core.GoWithGroup(req.Key(), func() {
+		m.semaphore.P()
+		defer m.semaphore.V()
 		ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
-		_, err := m.mongocli.Database(req.DBName).Collection(req.CollName).BulkWrite(ctx, ms)
+		_, err := m.mongoCli.Database(req.DBName).Collection(req.CollName).BulkWrite(ctx, ms)
 		cancel()
 		if err != nil {
 			zlog.Errorf("mongo save error %v", err)
@@ -40,7 +42,9 @@ func (m *module) onMongoSave(req *MongoSave) {
 
 func (m *module) onMongoLoad(req *MongoLoad, resolve func(any), reject func(error)) {
 	core.GoWithGroup(req.Key(), func() {
-		cur, _ := m.mongocli.Database(req.DBName).Collection(req.CollName).Find(context.Background(), req.Filter)
+		m.semaphore.P()
+		defer m.semaphore.V()
+		cur, _ := m.mongoCli.Database(req.DBName).Collection(req.CollName).Find(context.Background(), req.Filter)
 		ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
 		err := cur.All(ctx, &req.Data)
 		cancel()

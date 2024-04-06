@@ -84,7 +84,7 @@ func New(m idef.IModule) *EventBus {
 }
 
 func (bus *EventBus) Cast(event *Event) {
-	msgbus.CastLocal(event)
+	msgbus.Cast(event)
 }
 
 func (bus *EventBus) SyncCast(event *Event) {

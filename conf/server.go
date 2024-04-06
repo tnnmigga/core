@@ -3,22 +3,14 @@ package conf
 import "log"
 
 var (
-	serverID   uint32
-	serverType string
+	ServerID   uint32
+	ServerType string
 )
 
-func ServerID() uint32 {
-	return serverID
-}
-
-func ServerType() string {
-	return serverType
-}
-
 func initServerConf() {
-	serverID = UInt32("server.id")
-	serverType = String("server.type")
-	if len(serverType) == 0 {
+	ServerID = UInt32("server.id")
+	ServerType = String("server.type")
+	if len(ServerType) == 0 {
 		log.Fatal("server.type is empty")
 	}
 }

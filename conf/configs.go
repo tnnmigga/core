@@ -78,6 +78,17 @@ func Any[T vType](name string) (v T, ok bool) {
 	return v, false
 }
 
+func Int(name string, defaultVal ...int) int {
+	v, ok := Any[float64](name)
+	if ok {
+		return int(v)
+	}
+	if len(defaultVal) > 0 {
+		return defaultVal[0]
+	}
+	panic(errConfigNotFound)
+}
+
 func Int64(name string, defaultVal ...int64) int64 {
 	v, ok := Any[float64](name)
 	if ok {

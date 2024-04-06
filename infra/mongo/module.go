@@ -6,8 +6,8 @@ import (
 
 	"github.com/tnnmigga/nett/basic"
 	"github.com/tnnmigga/nett/conf"
+	"github.com/tnnmigga/nett/core"
 	"github.com/tnnmigga/nett/idef"
-	"github.com/tnnmigga/nett/infra"
 
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -16,12 +16,14 @@ import (
 
 type module struct {
 	*basic.Module
-	mongocli *mongo.Client
+	semaphore *core.Semaphore // 控制并发数
+	mongoCli  *mongo.Client   // mongo
 }
 
-func New() idef.IModule {
+func New(name string) idef.IModule {
 	m := &module{
-		Module: basic.New(infra.ModNameMongo, basic.DefaultMQLen),
+		Module:    basic.New(name, basic.DefaultMQLen),
+		semaphore: core.NewSemaphore(conf.Int("mongo.max_concurrency", 0xFF)),
 	}
 	m.registerHandler()
 	m.Before(idef.ServerStateRun, m.beforeRun)
@@ -32,17 +34,17 @@ func New() idef.IModule {
 func (m *module) beforeRun() (err error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
-	m.mongocli, err = mongo.Connect(ctx, options.Client().ApplyURI(conf.String("mongo.url", "mongodb://localhost")))
+	m.mongoCli, err = mongo.Connect(ctx, options.Client().ApplyURI(conf.String("mongo.url", "mongodb://localhost")))
 	if err != nil {
 		return err
 	}
-	if err := m.mongocli.Ping(ctx, readpref.Primary()); err != nil {
+	if err := m.mongoCli.Ping(ctx, readpref.Primary()); err != nil {
 		return err
 	}
 	return nil
 }
 
 func (m *module) afterStop() (err error) {
-	m.mongocli.Disconnect(context.Background())
+	m.mongoCli.Disconnect(context.Background())
 	return nil
 }

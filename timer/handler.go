@@ -10,6 +10,6 @@ func (h *TimerHeap) onTimerTrigger(msg *timerTrigger) {
 	nowNs := util.NowNs()
 	for top := h.Top(); top != nil && top.Time <= nowNs; top = h.Top() {
 		h.Pop()
-		msgbus.CastLocal(top.Ctx)
+		msgbus.Cast(top.Ctx)
 	}
 }
