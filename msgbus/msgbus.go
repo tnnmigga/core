@@ -46,6 +46,7 @@ func Cast(msg any, opts ...castOpt) {
 	serverID := findCastOpt[uint32](opts, idef.ConstKeyServerID, conf.ServerID)
 	if serverID == conf.ServerID {
 		castLocal(msg, opts...)
+		return
 	}
 	if nonuse := findCastOpt[bool](opts, idef.ConstKeyNonuseStream, false); nonuse { // 不使用流
 		castLocal(&idef.CastPackage{
