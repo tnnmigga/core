@@ -2,8 +2,14 @@ package mysql
 
 import "gorm.io/gorm"
 
-type Raw map[string]any
-type Raws []Raw
+type (
+	Raw  map[string]any
+	Raws []map[string]any
+)
+
+const (
+	SQLExecOK = "OK"
+)
 
 // 直接根据sql执行
 // 支持跨进程调用
@@ -11,6 +17,26 @@ type Raws []Raw
 type ExecSQL struct {
 	GroupKey string
 	SQL      string
+	Args     []any
+}
+
+// 直接根据sql执行
+// 支持跨进程调用
+// GroupKey为保证并发时的时序
+type RawSQL struct {
+	GroupKey string
+	SQL      string
+	Args     []any
+}
+
+// 简单查询
+// 支持跨进程调用
+// GroupKey为保证并发时的时序
+type First struct {
+	GroupKey string
+	Table    string
+	Select   []string
+	Where    string
 	Args     []any
 }
 

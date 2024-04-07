@@ -147,7 +147,7 @@ func warpCb[T any](cb func(T, error)) func(any, error) {
 		}
 		resp, ok := pkg.(T)
 		if !ok {
-			zlog.Panicf("rpc resp type error, need %s, cur %s", util.TypeName(new(T)), util.TypeName(pkg))
+			zlog.Errorf("rpc resp type error, %#v %#v", *new(T), pkg)
 		}
 		cb(resp, err)
 	}

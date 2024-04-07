@@ -49,6 +49,10 @@ func Init() {
 	logger = l.Sugar()
 }
 
+func Logger() *zap.SugaredLogger {
+	return logger
+}
+
 func Debug(args ...any) {
 	logger.Debug(args...)
 }
