@@ -41,9 +41,10 @@ type RPCResponse struct {
 }
 
 type RPCContext struct {
-	Caller   IModule
-	ServerID uint32
-	Req      any
-	Resp     any
-	Cb       func(resp any, err error)
+	Caller     IModule
+	ServerType string
+	ServerID   uint32
+	Req        any
+	Resp       any
+	Cb         func(resp any, err error)
 }

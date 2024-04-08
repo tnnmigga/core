@@ -102,23 +102,31 @@ func Randomcast(serverType string, msg any) {
 }
 
 // RPC 跨协程/进程调用
-// caller: 调用方模块 也是回调函数的执行者
-// serverID: 目标模块进程ID 可以是自己(serverID=0 或 conf.ServerID)或者其他进程ServerID
-// req: 调用参数
+// caller: 为调用者模块 也是回调函数的执行者
+// target: 目标参数 可以通过msgbus.ServerID()指定某个特定的进程或通过msgbus.ServerType()在某类进程中随机一个
+// 调用本地使用msgbus.Local()或msgbus.ServerID(conf.ServerID)
+// req: 请求参数
 // cb: 回调函数 由调用方模块线程执行
-func RPC[T any](caller idef.IModule, serverID uint32, req any, cb func(resp T, err error)) {
+func RPC[T any](caller idef.IModule, target castOpt, req any, cb func(resp T, err error)) {
 	// 跨协程传递消息默认深拷贝防止并发修改
 	req = deepcopy.Copy(req)
-	if serverID == conf.ServerID || serverID == 0 {
+	if target.key == idef.ConstKeyServerID && target.value.(uint32) == conf.ServerID {
 		localCall(caller, req, warpCb(cb))
 		return
 	}
 	rpcCtx := &idef.RPCContext{
-		Caller:   caller,
-		ServerID: serverID,
-		Req:      req,
-		Resp:     util.New[T](),
-		Cb:       warpCb(cb),
+		Caller: caller,
+		Req:    req,
+		Resp:   util.New[T](),
+		Cb:     warpCb(cb),
+	}
+	if target.key == idef.ConstKeyServerID {
+		rpcCtx.ServerID = target.value.(uint32)
+	} else if target.key == idef.ConstKeyServerType {
+		rpcCtx.ServerType = target.value.(string)
+	} else {
+		zlog.Errorf("rpc target type error %v", target.value)
+		return
 	}
 	castLocal(rpcCtx)
 }

@@ -75,7 +75,16 @@ func (m *module) onRPContext(ctx *idef.RPCContext) {
 			Resp:   ctx.Resp,
 		}
 		defer ctx.Caller.Assign(resp)
-		msg, err := m.conn.Request(rpcSubject(ctx.ServerID), b, conf.MaxRPCWaitTime)
+		var subject string
+		if ctx.ServerType != "" {
+			subject = randomRpcSubject(ctx.ServerType)
+		} else if ctx.ServerID != 0 {
+			subject = rpcSubject(ctx.ServerID)
+		} else {
+			resp.Err = errors.New("invalid rpc context")
+			return
+		}
+		msg, err := m.conn.Request(subject, b, conf.MaxRPCWaitTime)
 		if err != nil {
 			resp.Err = err
 			return

@@ -24,15 +24,12 @@ const (
 
 type module struct {
 	*basic.Module
-	conn         *nats.Conn
-	js           jetstream.JetStream
-	stream       jetstream.Stream
-	cons         jetstream.Consumer
-	consCtx      jetstream.ConsumeContext
-	castSub      *nats.Subscription
-	broadcastSub *nats.Subscription
-	queueSub     *nats.Subscription
-	rpcSub       *nats.Subscription
+	conn    *nats.Conn
+	js      jetstream.JetStream
+	stream  jetstream.Stream
+	cons    jetstream.Consumer
+	consCtx jetstream.ConsumeContext
+	subs    [5]*nats.Subscription
 }
 
 func New() idef.IModule {
@@ -81,23 +78,27 @@ func (m *module) afterRun() (err error) {
 	if err != nil {
 		return err
 	}
-	m.consCtx, err = m.cons.Consume(m.streamRecv)
+	m.consCtx, err = m.cons.Consume(m.streamMsgHandler)
 	if err != nil {
 		return err
 	}
-	m.castSub, err = m.conn.Subscribe(castSubject(conf.ServerID), m.msgHandler)
+	m.subs[0], err = m.conn.Subscribe(castSubject(conf.ServerID), m.msgHandler)
 	if err != nil {
 		return err
 	}
-	m.broadcastSub, err = m.conn.Subscribe(broadcastSubject(conf.ServerType), m.msgHandler)
+	m.subs[1], err = m.conn.Subscribe(broadcastSubject(conf.ServerType), m.msgHandler)
 	if err != nil {
 		return err
 	}
-	m.queueSub, err = m.conn.QueueSubscribe(randomCastSubject(conf.ServerType), conf.ServerType, m.msgHandler)
+	m.subs[2], err = m.conn.QueueSubscribe(randomCastSubject(conf.ServerType), conf.ServerType, m.msgHandler)
 	if err != nil {
 		return err
 	}
-	m.rpcSub, err = m.conn.Subscribe(rpcSubject(conf.ServerID), m.rpcHandler)
+	m.subs[3], err = m.conn.Subscribe(rpcSubject(conf.ServerID), m.rpcHandler)
+	if err != nil {
+		return err
+	}
+	m.subs[4], err = m.conn.QueueSubscribe(randomRpcSubject(conf.ServerType), conf.ServerType, m.rpcHandler)
 	if err != nil {
 		return err
 	}
@@ -124,12 +125,15 @@ func rpcSubject(serverID uint32) string {
 	return fmt.Sprintf("rpc.%d", serverID)
 }
 
+func randomRpcSubject(serverType string) string {
+	return fmt.Sprintf("randomrpc.%s", serverType)
+}
+
 func (m *module) beforeStop() error {
 	m.consCtx.Stop()
-	m.castSub.Drain()
-	m.broadcastSub.Drain()
-	m.queueSub.Drain()
-	m.rpcSub.Drain()
+	for _, sub := range m.subs {
+		sub.Drain()
+	}
 	return nil
 }
 
@@ -139,7 +143,7 @@ func (m *module) afterStop() error {
 	return nil
 }
 
-func (m *module) streamRecv(msg jetstream.Msg) {
+func (m *module) streamMsgHandler(msg jetstream.Msg) {
 	defer util.RecoverPanic()
 	msg.Ack()
 	if expires := msg.Headers().Get(idef.ConstKeyExpires); expires != "" {
@@ -179,7 +183,7 @@ func (m *module) rpcHandler(msg *nats.Msg) {
 		m.conn.Publish(msg.Reply, codec.Encode(rpcResp))
 		return
 	}
-	msgbus.RPC(m, conf.ServerID, req, func(resp any, err error) {
+	msgbus.RPC(m, msgbus.Local(), req, func(resp any, err error) {
 		if err != nil {
 			rpcResp.Err = err.Error()
 		} else {

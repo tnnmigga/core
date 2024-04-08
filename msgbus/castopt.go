@@ -3,6 +3,7 @@ package msgbus
 import (
 	"time"
 
+	"github.com/tnnmigga/nett/conf"
 	"github.com/tnnmigga/nett/idef"
 	"github.com/tnnmigga/nett/util"
 )
@@ -42,9 +43,23 @@ func ServerID(serverID uint32) castOpt {
 	}
 }
 
+func ServerType(serverType string) castOpt {
+	return castOpt{
+		key:   idef.ConstKeyServerType,
+		value: serverType,
+	}
+}
+
 func Expires(expires time.Duration) castOpt {
 	return castOpt{
 		key:   idef.ConstKeyExpires,
 		value: int64(util.NowNs() + expires),
+	}
+}
+
+func Local() castOpt {
+	return castOpt{
+		key:   idef.ConstKeyServerID,
+		value: conf.ServerID,
 	}
 }

@@ -1,6 +1,8 @@
 package conf
 
-import "log"
+import (
+	"log"
+)
 
 var (
 	ServerID   uint32

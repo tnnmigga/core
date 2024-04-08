@@ -14,6 +14,7 @@ const (
 	ConstKeyNonuseStream = "nonuse-stream"
 	ConstKeyOneOfMods    = "one-of-mods"
 	ConstKeyServerID     = "server-id"
+	ConstKeyServerType   = "server-type"
 	ConstKeyExpires      = "expires"
 )
 
