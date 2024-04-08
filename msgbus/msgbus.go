@@ -83,6 +83,7 @@ func castLocal(msg any, opts ...castOpt) {
 	}
 }
 
+// 广播到一个serverType类别下的所有进程
 func Broadcast(serverType string, msg any) {
 	pkg := &idef.BroadcastPackage{
 		ServerType: serverType,
@@ -91,15 +92,29 @@ func Broadcast(serverType string, msg any) {
 	castLocal(pkg)
 }
 
-func RPC[T any](m idef.IModule, serverID uint32, req any, cb func(resp T, err error)) {
+// 随机等概率投递到一个serverType类别下的某个进程
+func Randomcast(serverType string, msg any) {
+	pkg := &idef.RandomCastPackage{
+		ServerType: serverType,
+		Body:       deepcopy.Copy(msg),
+	}
+	castLocal(pkg)
+}
+
+// RPC 跨协程/进程调用
+// caller: 调用方模块 也是回调函数的执行者
+// serverID: 目标模块进程ID 可以是自己(serverID=0 或 conf.ServerID)或者其他进程ServerID
+// req: 调用参数
+// cb: 回调函数 由调用方模块线程执行
+func RPC[T any](caller idef.IModule, serverID uint32, req any, cb func(resp T, err error)) {
 	// 跨协程传递消息默认深拷贝防止并发修改
 	req = deepcopy.Copy(req)
-	if serverID == conf.ServerID {
-		localCall(m, req, warpCb(cb))
+	if serverID == conf.ServerID || serverID == 0 {
+		localCall(caller, req, warpCb(cb))
 		return
 	}
 	rpcCtx := &idef.RPCContext{
-		Caller:   m,
+		Caller:   caller,
 		ServerID: serverID,
 		Req:      req,
 		Resp:     util.New[T](),

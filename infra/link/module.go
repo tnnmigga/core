@@ -85,19 +85,19 @@ func (m *module) afterRun() (err error) {
 	if err != nil {
 		return err
 	}
-	m.castSub, err = m.conn.Subscribe(castSubject(conf.ServerID), m.recv)
+	m.castSub, err = m.conn.Subscribe(castSubject(conf.ServerID), m.msgHandler)
 	if err != nil {
 		return err
 	}
-	m.broadcastSub, err = m.conn.Subscribe(broadcastSubject(conf.ServerType), m.recv)
+	m.broadcastSub, err = m.conn.Subscribe(broadcastSubject(conf.ServerType), m.msgHandler)
 	if err != nil {
 		return err
 	}
-	m.queueSub, err = m.conn.QueueSubscribe(randomCastSubject(conf.ServerType), conf.ServerType, m.recv)
+	m.queueSub, err = m.conn.QueueSubscribe(randomCastSubject(conf.ServerType), conf.ServerType, m.msgHandler)
 	if err != nil {
 		return err
 	}
-	m.rpcSub, err = m.conn.Subscribe(rpcSubject(conf.ServerID), m.rpc)
+	m.rpcSub, err = m.conn.Subscribe(rpcSubject(conf.ServerID), m.rpcHandler)
 	if err != nil {
 		return err
 	}
@@ -142,7 +142,6 @@ func (m *module) afterStop() error {
 func (m *module) streamRecv(msg jetstream.Msg) {
 	defer util.RecoverPanic()
 	msg.Ack()
-	zlog.Debug(msg.Headers())
 	if expires := msg.Headers().Get(idef.ConstKeyExpires); expires != "" {
 		// 检测部分不重要但有一定时效性的消息是否超时
 		// 比如往客户端推送的实时消息
@@ -161,7 +160,7 @@ func (m *module) streamRecv(msg jetstream.Msg) {
 	msgbus.Cast(pkg)
 }
 
-func (m *module) recv(msg *nats.Msg) {
+func (m *module) msgHandler(msg *nats.Msg) {
 	defer util.RecoverPanic()
 	pkg, err := codec.Decode(msg.Data)
 	if err != nil {
@@ -171,7 +170,7 @@ func (m *module) recv(msg *nats.Msg) {
 	msgbus.Cast(pkg)
 }
 
-func (m *module) rpc(msg *nats.Msg) {
+func (m *module) rpcHandler(msg *nats.Msg) {
 	defer util.RecoverPanic()
 	req, err := codec.Decode(msg.Data)
 	rpcResp := &RPCResult{}
@@ -180,7 +179,7 @@ func (m *module) rpc(msg *nats.Msg) {
 		m.conn.Publish(msg.Reply, codec.Encode(rpcResp))
 		return
 	}
-	msgbus.RPC[any](m, conf.ServerID, req, func(resp any, err error) {
+	msgbus.RPC(m, conf.ServerID, req, func(resp any, err error) {
 		if err != nil {
 			rpcResp.Err = err.Error()
 		} else {

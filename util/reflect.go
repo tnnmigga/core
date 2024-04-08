@@ -1,7 +1,6 @@
 package util
 
 import (
-	"encoding/json"
 	"fmt"
 	"reflect"
 	"strconv"
@@ -19,17 +18,7 @@ func New[T any]() any {
 	return reflect.New(typeOf).Interface()
 }
 
-func String(v any) string {
-	type IString interface{ String() string }
-	if v0, ok := v.(IString); ok {
-		return fmt.Sprintf("[ %s: %s ]", TypeName(v0), v0.String())
-	}
-	if b, err := json.Marshal(v); err == nil {
-		return fmt.Sprintf("[ %s: %s ]", TypeName(v), string(b))
-	}
-	return fmt.Sprintf("[ %s: %v ]", TypeName(v), v)
-}
-
+// 将任意类型值转换为指定类型整型
 func Integer[T constraints.Integer](value any) T {
 	switch v := value.(type) {
 	case string:
@@ -63,6 +52,40 @@ func Integer[T constraints.Integer](value any) T {
 	case byte:
 		return T(v)
 	default:
-		panic(fmt.Errorf("Integer type error %v", reflect.TypeOf(value)))
+		panic(fmt.Errorf("Integer transfor error %#v", v))
+	}
+}
+
+// 将任意类型值转换为指定类型浮点型
+func Float[T constraints.Float](value any) T {
+	switch v := value.(type) {
+	case string:
+		n, err := strconv.ParseFloat(v, 64)
+		if err != nil {
+			panic(err)
+		}
+		return T(n)
+	case int:
+		return T(v)
+	case int16:
+		return T(v)
+	case int32:
+		return T(v)
+	case int64:
+		return T(v)
+	case uint:
+		return T(v)
+	case uint16:
+		return T(v)
+	case uint32:
+		return T(v)
+	case uint64:
+		return T(v)
+	case float32:
+		return T(v)
+	case float64:
+		return T(v)
+	default:
+		panic(fmt.Errorf("Float type error %#v", value))
 	}
 }

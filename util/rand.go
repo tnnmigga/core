@@ -9,11 +9,13 @@ import (
 	"golang.org/x/exp/constraints"
 )
 
+// RandomInterval 生成一个随机数, 范围是[low, high]
 func RandomInterval[T constraints.Integer](low, high T) T {
 	a, b := int64(low), int64(high)
 	return T(rand.Int63n(b-a+1) + a)
 }
 
+// RandomIntervalN 生成指定数量的随机数, 范围是[low, high], 保证不重复
 func RandomIntervalN[T constraints.Signed](low, high T, num T) algorithm.Set[T] {
 	maxNum := high - low + 1
 	if maxNum < num {

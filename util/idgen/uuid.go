@@ -39,6 +39,7 @@ func newMs() uint64 {
 	return uint64(ms - 1700000000000)
 }
 
+// 雪花算法生成一个新的UUID
 func NewUUID() uint64 {
 	return uuidgen.NewID()
 }
