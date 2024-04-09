@@ -4,7 +4,6 @@ import (
 	"github.com/tnnmigga/nett/basic"
 	"github.com/tnnmigga/nett/core"
 	"github.com/tnnmigga/nett/idef"
-	"github.com/tnnmigga/nett/zlog"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 )
@@ -19,7 +18,6 @@ type module struct {
 }
 
 func New(name idef.ModName, dsn string) idef.IModule {
-	zlog.Info("mysql module init", "name", name, "dsn", dsn)
 	m := &module{
 		Module:    basic.New(name, basic.DefaultMQLen),
 		semaphore: core.NewSemaphore(MaxConcurrency),

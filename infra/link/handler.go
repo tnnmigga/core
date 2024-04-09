@@ -32,7 +32,6 @@ func (m *module) onCastPackage(pkg *idef.CastPackage) {
 
 func (m *module) onStreamCastPackage(pkg *idef.StreamCastPackage) {
 	b := codec.Encode(pkg.Body)
-	// _, err := m.js.PublishAsync(streamCastSubject(pkg.ServerID), b)
 	msg := &nats.Msg{
 		Subject: streamCastSubject(pkg.ServerID),
 		Data:    b,
