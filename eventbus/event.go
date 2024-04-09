@@ -110,14 +110,14 @@ func (h *eventHandler) Handler(event *Event) {
 	h.handler(event)
 }
 
-func (e Event) Int(name string) int {
+func (e *Event) Int(name string) int {
 	if n, err := strconv.Atoi(e.Str(name)); err == nil {
 		return n
 	}
 	panic(fmt.Errorf("event param %s not a number ", name))
 }
 
-func (e Event) Str(name string) (arg string) {
+func (e *Event) Str(name string) (arg string) {
 	if e.Args != nil {
 		if v, ok := e.Args[name]; ok {
 			return v
