@@ -112,10 +112,10 @@ func WaitGoDone(maxWaitTime time.Duration) {
 	cancelGo()
 	c := make(chan struct{}, 1)
 	timer := time.After(maxWaitTime)
-	go util.ExecAndRecover(func() {
+	go func() {
 		wg.Wait()
 		c <- struct{}{}
-	})
+	}()
 	select {
 	case <-c:
 		return
