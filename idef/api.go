@@ -14,4 +14,5 @@ type IModule interface {
 	Before(state ServerState, hook func() error)
 	After(state ServerState, hook func() error)
 	Hook(state ServerState, stage int) []func() error
+	Async(f func() (any, error), cb func(any, error))
 }
