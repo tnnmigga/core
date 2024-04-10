@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"reflect"
 
+	"github.com/tnnmigga/nett/core"
 	"github.com/tnnmigga/nett/idef"
 	"github.com/tnnmigga/nett/msgbus"
 	"github.com/tnnmigga/nett/util"
@@ -107,4 +108,26 @@ func (m *Module) cb(msg any) {
 		zlog.Errorf("%s %s cb type error", m.name, util.TypeName(msg))
 	}
 	fn(msg)
+}
+
+type asyncContext struct {
+	res any
+	err error
+	cb  func(any, error)
+}
+
+// 异步回调的方式执行函数
+// 启动一个新的goruntine执行同步阻塞的代码
+// 执行完将结果返到模块线程往后执行
+// 匿名函数捕获的变量需要防范并发读写问题
+func (m *Module) Async(f func() (any, error), cb func(any, error)) {
+	core.Go(func() {
+		defer util.RecoverPanic()
+		res, err := f()
+		m.Assign(&asyncContext{
+			res: res,
+			err: err,
+			cb:  cb,
+		})
+	})
 }
