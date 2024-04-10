@@ -11,7 +11,7 @@ import (
 func String(v any) string {
 	type IString interface{ String() string }
 	if v0, ok := v.(IString); ok {
-		return fmt.Sprintf("[ %s { %s } ]", TypeName(v0), v0.String())
+		return fmt.Sprintf("[ %s [ %s ] ]", TypeName(v0), v0.String())
 	}
 	if b, err := json.Marshal(v); err == nil {
 		return fmt.Sprintf("[ %s %s ]", TypeName(v), string(b))
