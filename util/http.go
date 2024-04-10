@@ -4,17 +4,27 @@ import (
 	"bytes"
 	"io"
 	"net/http"
+	"strings"
 )
 
-func HttpPost(url string, data []byte, header map[string]string) ([]byte, error) {
-	return HttpRequest("POST", url, data, header)
+func HttpPost(url string, data []byte, header ...map[string]string) ([]byte, error) {
+	if len(header) == 0 {
+		return HttpRequest("POST", url, data, nil)
+	}
+	return HttpRequest("POST", url, data, header[0])
 }
 
-func HttpGet(url string, header map[string]string) ([]byte, error) {
-	return HttpRequest("GET", url, nil, header)
+func HttpGet(url string, header ...map[string]string) ([]byte, error) {
+	if len(header) == 0 {
+		return HttpRequest("GET", url, nil, nil)
+	}
+	return HttpRequest("GET", url, nil, header[0])
 }
 
 func HttpRequest(method, url string, data []byte, header map[string]string) ([]byte, error) {
+	if !strings.HasPrefix(url, "http://") && !strings.HasPrefix(url, "https://") {
+		url = "http://" + url
+	}
 	req, err := http.NewRequest(method, url, bytes.NewBuffer(data))
 	if err != nil {
 		return nil, err
