@@ -9,21 +9,21 @@ import (
 	"github.com/tnnmigga/nett/zlog"
 )
 
-func (m *Module) onRPCRequest(msg *idef.RPCRequest) {
-	msgType := reflect.TypeOf(msg.Req)
+func (m *Module) onRPCRequest(req *idef.RPCRequest) {
+	msgType := reflect.TypeOf(req.Req)
 	h, ok := m.handlers[msgType]
 	if !ok {
-		msg.Err <- fmt.Errorf("rpc handler not found %v", msgType)
+		req.Err <- fmt.Errorf("rpc handler not found %v", msgType)
 		return
 	}
 	fn, ok := h.(func(any, func(any), func(error)))
 	if !ok {
-		zlog.Errorf("%s %s rpc type error", m.name, util.TypeName(msg))
+		zlog.Errorf("%s %s rpc type error", m.name, util.TypeName(req))
 	}
-	fn(msg.Req, func(v any) {
-		msg.Resp <- v
+	fn(req.Req, func(v any) {
+		req.Resp <- v
 	}, func(err error) {
-		msg.Err <- err
+		req.Err <- err
 	})
 }
 
@@ -31,6 +31,6 @@ func (m *Module) onRPCResponse(req *idef.RPCResponse) {
 	req.Cb(req.Resp, req.Err)
 }
 
-func (m *Module) onAsyncContext(ctx *asyncContext) {
-	ctx.cb(ctx.res, ctx.err)
+func (m *Module) onAsyncContext(req *asyncContext) {
+	req.cb(req.res, req.err)
 }

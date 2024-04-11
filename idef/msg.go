@@ -1,10 +1,5 @@
 package idef
 
-type Handler struct {
-	Cb  func(msg any)
-	RPC func(req any, resolve func(any), reject func(error))
-}
-
 type CastPackage struct {
 	ServerID uint32
 	Body     any
@@ -26,12 +21,14 @@ type RandomCastPackage struct {
 	Body       any
 }
 
+// 发起RPC请求
 type RPCRequest struct {
 	Req  any
 	Resp chan any
 	Err  chan error
 }
 
+// RPC请求完成
 type RPCResponse struct {
 	Module IModule
 	Req    any
@@ -40,6 +37,7 @@ type RPCResponse struct {
 	Cb     func(resp any, err error)
 }
 
+// RPC上下文 跨进程调用时用到
 type RPCContext struct {
 	Caller     IModule
 	ServerType string
