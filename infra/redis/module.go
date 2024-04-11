@@ -25,13 +25,21 @@ func New(name idef.ModName, addr, username, password string) idef.IModule {
 		}),
 	}
 	m.After(idef.ServerStateInit, m.afterInit)
+	m.After(idef.ServerStateStop, m.afterStop)
 	return m
 }
 
 func (m *module) afterInit() error {
-	m.initHandler()
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
 	_, err := m.cli.Ping(ctx).Result()
-	return err
+	if err != nil {
+		return err
+	}
+	m.initHandler()
+	return nil
+}
+
+func (m *module) afterStop() error {
+	return m.cli.Close()
 }
