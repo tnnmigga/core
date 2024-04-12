@@ -8,7 +8,6 @@ import (
 	"github.com/tnnmigga/nett/msgbus"
 	"github.com/tnnmigga/nett/zlog"
 
-	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
@@ -20,12 +19,7 @@ func (m *module) registerHandler() {
 func (m *module) onMongoSave(req *MongoSave) {
 	ms := make([]mongo.WriteModel, 0, len(req.Ops))
 	for _, op := range req.Ops {
-		b, err := bson.Marshal(op.Value)
-		if err != nil {
-			zlog.Errorf("save %#v bson error %v", op.Value, err)
-			continue
-		}
-		m := mongo.NewReplaceOneModel().SetFilter(op.Filter).SetReplacement(b).SetUpsert(true)
+		m := mongo.NewReplaceOneModel().SetFilter(op.Filter).SetReplacement(op.Value).SetUpsert(true)
 		ms = append(ms, m)
 	}
 	core.GoWithGroup(req.GroupKey, func() {

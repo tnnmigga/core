@@ -6,7 +6,7 @@ import (
 
 type MongoSaveOp struct {
 	Filter bson.M
-	Value  any
+	Value  []byte // Value必须是bson序列化好的二进制数据
 }
 
 // 保存至MongoDB

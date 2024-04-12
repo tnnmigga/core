@@ -42,23 +42,23 @@ func NewServer(modules ...idef.IModule) *Server {
 }
 
 func (s *Server) onInit() {
-	zlog.Info("server initialization")
+	zlog.Warn("server initialization")
 	s.after(idef.ServerStateInit, s.abort)
 }
 
 func (s *Server) onRun() {
 	s.before(idef.ServerStateRun, s.abort)
-	zlog.Info("server try to run")
+	zlog.Warn("server try to run")
 	for _, m := range s.modules {
 		s.runModule(s.wg, m)
 	}
-	zlog.Info("server running successfully")
+	zlog.Warn("server running successfully")
 	s.after(idef.ServerStateRun, s.abort)
 }
 
 func (s *Server) onStop() {
 	s.before(idef.ServerStateStop, s.noabort)
-	zlog.Info("server try to stop")
+	zlog.Warn("server try to stop")
 	s.waitMsgHandling(time.Minute)
 	core.WaitGoDone(time.Minute)
 	for i := len(s.modules) - 1; i >= 0; i-- {
@@ -66,7 +66,7 @@ func (s *Server) onStop() {
 		util.ExecAndRecover(m.Stop)
 	}
 	s.wg.Wait()
-	zlog.Info("server stoped successfully")
+	zlog.Warn("server stoped successfully")
 	s.after(idef.ServerStateStop, s.noabort)
 	s.onExit()
 }
@@ -77,7 +77,7 @@ func (s *Server) Exit() {
 
 func (s *Server) onExit() {
 	s.before(idef.ServerStateExit, s.noabort)
-	zlog.Info("server close")
+	zlog.Warn("server close")
 	os.Exit(0)
 }
 
