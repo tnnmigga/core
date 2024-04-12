@@ -67,6 +67,7 @@ func (s *Server) onStop() {
 	}
 	s.wg.Wait()
 	zlog.Info("server stoped successfully")
+	s.after(idef.ServerStateStop, s.noabort)
 	s.onExit()
 }
 

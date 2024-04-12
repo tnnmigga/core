@@ -1,6 +1,8 @@
 import protobuf from 'protobufjs';
 import { readdirSync } from 'fs'
 import { log } from 'console';
+import repl from 'repl'
+
 
 const msgBuilders = {}
 const msgidToName = {}
@@ -30,9 +32,8 @@ export function initMsgBuilder(path) {
 export function encode(msgName, msg) {
     let protoMsg = msgBuilders[msgName].create(msg)
     protoMsg = msgBuilders[msgName].encode(protoMsg).finish()
-    let buf = Buffer.alloc(8)
-    buf.writeUint32LE(protoMsg.length + 4)
-    buf.writeUint32LE(nametoid(msgName), 4)
+    let buf = Buffer.alloc(4)
+    buf.writeUint32LE(nametoid(msgName))
     return Buffer.concat([buf, Buffer.from(protoMsg)])
 }
 
@@ -57,6 +58,15 @@ function nametoid(msgName) {
     return uint32(v)
 }
 
+export function runCli(context = {}, name = 'REPL') {
+    const r = repl.start({
+        // prompt: `${name} > `,
+        preview: true,
+        terminal: true,
+    });
+    Object.setPrototypeOf(r.context, context);
+    global.console = r.context.console;
+}
 
 // var m = encode("SayHelloReq", { text: "hello" })
 // var n = decode(m)
