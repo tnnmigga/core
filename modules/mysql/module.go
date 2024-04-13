@@ -1,9 +1,9 @@
 package mysql
 
 import (
-	"github.com/tnnmigga/nett/basic"
 	"github.com/tnnmigga/nett/core"
 	"github.com/tnnmigga/nett/idef"
+	"github.com/tnnmigga/nett/modules/basic"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 )
