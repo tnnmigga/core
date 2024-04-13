@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/tnnmigga/nett/zlog"
+	"github.com/tnnmigga/nett/infra/zlog"
 	"go.uber.org/zap/zapcore"
 	"gorm.io/gorm/logger"
 )

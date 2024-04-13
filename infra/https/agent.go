@@ -1,4 +1,4 @@
-package web
+package https
 
 import (
 	"context"
@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/tnnmigga/nett/core"
-	"github.com/tnnmigga/nett/zlog"
+	"github.com/tnnmigga/nett/infra/zlog"
 
 	"github.com/gin-gonic/gin"
 )

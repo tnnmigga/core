@@ -46,7 +46,6 @@ func NewTimerHeap(m idef.IModule) *TimerHeap {
 		module: m,
 	}
 	msgbus.RegisterHandler(m, h.onTimerTrigger)
-	core.Go(h.tryNextTrigger)
 	return h
 }
 
@@ -100,5 +99,8 @@ func (h *TimerHeap) tryNextTrigger() {
 }
 
 func (h *TimerHeap) trigger() {
-	msgbus.Cast(&timerTrigger{}, msgbus.OneOfMods(h.module.Name()))
+	// 此函数的执行协程为模块协程外的临时开辟的协程
+	// 若直接操作数据会存在并发问题
+	// 因此是投递消息给模块由模块协程来操作定时器数据
+	h.module.Assign(&timerTrigger{})
 }

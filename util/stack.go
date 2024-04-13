@@ -6,8 +6,8 @@ import (
 	"runtime/debug"
 	"strings"
 
+	"github.com/tnnmigga/nett/infra/zlog"
 	"github.com/tnnmigga/nett/util/idgen"
-	"github.com/tnnmigga/nett/zlog"
 )
 
 func RecoverPanic() {

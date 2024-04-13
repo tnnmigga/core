@@ -8,8 +8,8 @@ import (
 	"github.com/tnnmigga/nett/conf"
 	"github.com/tnnmigga/nett/core"
 	"github.com/tnnmigga/nett/idef"
+	"github.com/tnnmigga/nett/infra/zlog"
 	"github.com/tnnmigga/nett/msgbus"
-	"github.com/tnnmigga/nett/zlog"
 
 	"github.com/nats-io/nats.go"
 )

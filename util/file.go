@@ -4,13 +4,13 @@ import (
 	"io"
 	"os"
 
-	"github.com/tnnmigga/nett/zlog"
+	"github.com/tnnmigga/nett/infra/zlog"
 )
 
 func ReadFile(name string) []byte {
 	file, err := os.OpenFile(name, os.O_RDONLY, 0)
 	if err != nil {
-		zlog.Panic(err)
+		panic(err)
 	}
 	b, err := io.ReadAll(file)
 	if err != nil {

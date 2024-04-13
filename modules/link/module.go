@@ -9,10 +9,10 @@ import (
 	"github.com/tnnmigga/nett/codec"
 	"github.com/tnnmigga/nett/conf"
 	"github.com/tnnmigga/nett/idef"
+	"github.com/tnnmigga/nett/infra/zlog"
 	"github.com/tnnmigga/nett/modules/basic"
 	"github.com/tnnmigga/nett/msgbus"
 	"github.com/tnnmigga/nett/util"
-	"github.com/tnnmigga/nett/zlog"
 
 	"github.com/nats-io/nats.go"
 	"github.com/nats-io/nats.go/jetstream"

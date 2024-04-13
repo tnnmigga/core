@@ -1,7 +1,6 @@
 package nett
 
 import (
-	"flag"
 	"fmt"
 	"os"
 	"runtime/debug"
@@ -11,16 +10,15 @@ import (
 	"github.com/tnnmigga/nett/conf"
 	"github.com/tnnmigga/nett/core"
 	"github.com/tnnmigga/nett/idef"
+	"github.com/tnnmigga/nett/infra/sys/argv"
+	"github.com/tnnmigga/nett/infra/zlog"
 	"github.com/tnnmigga/nett/modules/link"
 	"github.com/tnnmigga/nett/util"
-	"github.com/tnnmigga/nett/zlog"
 )
 
 func init() {
-	var config string
-	flag.StringVar(&config, "c", "configs.jsonc", "配置文件名")
-	flag.Parse()
-	conf.LoadFromJSON(util.ReadFile(config))
+	fname := argv.Str("configs.jsonc", "-c", "--config")
+	conf.LoadFromJSON(util.ReadFile(fname))
 	zlog.Init()
 }
 

@@ -6,7 +6,7 @@ import (
 
 	"github.com/tnnmigga/nett/codec"
 	"github.com/tnnmigga/nett/idef"
-	"github.com/tnnmigga/nett/zlog"
+	"github.com/tnnmigga/nett/infra/zlog"
 )
 
 func RegisterHandler[T any](m idef.IModule, fn func(T)) {

@@ -10,6 +10,10 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
+func init() {
+	
+}
+
 var (
 	confs map[string]any = map[string]any{}
 	fns   []func()
@@ -111,7 +115,7 @@ func Int32(name string, defaultVal ...int32) int32 {
 	panic(errConfigNotFound)
 }
 
-func UInt64(name string, defaultVal ...uint64) uint64 {
+func Uint64(name string, defaultVal ...uint64) uint64 {
 	v, ok := Any[float64](name)
 	if ok {
 		return uint64(v)
@@ -122,7 +126,7 @@ func UInt64(name string, defaultVal ...uint64) uint64 {
 	panic(errConfigNotFound)
 }
 
-func UInt32(name string, defaultVal ...uint32) uint32 {
+func Uint32(name string, defaultVal ...uint32) uint32 {
 	v, ok := Any[float64](name)
 	if ok {
 		return uint32(v)

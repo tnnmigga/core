@@ -4,7 +4,7 @@ import (
 	"math/rand"
 
 	"github.com/tnnmigga/nett/algorithm"
-	"github.com/tnnmigga/nett/zlog"
+	"github.com/tnnmigga/nett/infra/zlog"
 
 	"golang.org/x/exp/constraints"
 )
