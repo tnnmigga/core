@@ -2,7 +2,6 @@ package nett
 
 import (
 	"fmt"
-	"os"
 	"runtime/debug"
 	"sync"
 	"time"
@@ -74,10 +73,9 @@ func (s *Server) onStop() {
 }
 
 func (s *Server) onExit() {
+	defer cluster.DeadNode()
 	s.before(idef.ServerStateExit, s.noabort)
-	cluster.DeadNode()
 	zlog.Warn("server exit")
-	os.Exit(0)
 }
 
 func (s *Server) Shutdown() {

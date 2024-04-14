@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/tnnmigga/nett/conf"
+	"github.com/tnnmigga/nett/infra/sys"
 	"github.com/tnnmigga/nett/infra/zlog"
 	etcd "go.etcd.io/etcd/client/v3"
 )
@@ -16,7 +17,7 @@ var (
 )
 
 const (
-	nodeTTL = 5 * time.Second
+	nodeTTL = 10 * time.Second
 )
 
 func etcdNodeKey() string {
@@ -25,6 +26,7 @@ func etcdNodeKey() string {
 
 var (
 	etcdCli *etcd.Client
+	ticker  *time.Ticker
 )
 
 func InitNode() error {
@@ -51,13 +53,22 @@ func InitNode() error {
 	if !putRes.Succeeded {
 		return ErrNodeIsExists
 	}
-	keepAlive, err := cli.KeepAlive(context.Background(), lease.ID)
-	if err != nil {
-		return err
-	}
+	ticker = time.NewTicker(nodeTTL / 2)
 	go func() {
-		for resp := range keepAlive {
-			zlog.Debugf("etcd keep alive success %v", resp.ID)
+		defer zlog.Infof("etcd keep alive goroutine exit")
+		for range ticker.C {
+			zlog.Debugf("etcd keep alive %d", lease.ID)
+			ctx, cancel := context.WithTimeout(context.Background(), nodeTTL/2)
+			_, err := etcdCli.KeepAliveOnce(ctx, lease.ID)
+			cancel()
+			// 若etcd异常则退出
+			if err != nil {
+				zlog.Errorf("etcd keep alive error: %v", err)
+				etcdCli.Close()
+				etcdCli = nil
+				sys.Abort()
+				return
+			}
 		}
 	}()
 	etcdCli = cli
@@ -65,6 +76,15 @@ func InitNode() error {
 }
 
 func DeadNode() {
-	etcdCli.Delete(context.Background(), etcdNodeKey())
+	ticker.Stop()
+	if etcdCli == nil {
+		return
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), nodeTTL)
+	defer cancel()
+	_, err := etcdCli.Delete(ctx, etcdNodeKey())
+	if err != nil {
+		zlog.Errorf("etcd delete node error: %v", err)
+	}
 	etcdCli.Close()
 }

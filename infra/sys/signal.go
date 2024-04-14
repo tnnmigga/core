@@ -6,12 +6,20 @@ import (
 	"syscall"
 )
 
-var exitSignals = []os.Signal{syscall.SIGQUIT, os.Interrupt, syscall.SIGTERM}
+var (
+	exitSignals = []os.Signal{syscall.SIGQUIT, os.Interrupt, syscall.SIGTERM}
+	sign        = make(chan os.Signal, 1)
+)
 
 func WaitExitSignal() os.Signal {
-	c := make(chan os.Signal, 1)
-	signal.Notify(c, exitSignals...)
-	return <-c
+	signal.Notify(sign, exitSignals...)
+	return <-sign
 }
 
-
+// 运行时故障触发进程退出流程
+func Abort() {
+	select {
+	case sign <- syscall.SIGQUIT:
+	default:
+	}
+}
