@@ -10,6 +10,7 @@ import (
 	"github.com/tnnmigga/nett/conf"
 	"github.com/tnnmigga/nett/core"
 	"github.com/tnnmigga/nett/idef"
+	"github.com/tnnmigga/nett/infra/cluster"
 	"github.com/tnnmigga/nett/infra/sys/argv"
 	"github.com/tnnmigga/nett/infra/zlog"
 	"github.com/tnnmigga/nett/modules/link"
@@ -41,6 +42,10 @@ func NewServer(modules ...idef.IModule) *Server {
 
 func (s *Server) onInit() {
 	zlog.Warnf("server initialization")
+	err := cluster.InitNode()
+	if err != nil {
+		zlog.Fatalf("cluster.InitNode error %v", err)
+	}
 	s.after(idef.ServerStateInit, s.abort)
 }
 
@@ -70,6 +75,7 @@ func (s *Server) onStop() {
 
 func (s *Server) onExit() {
 	s.before(idef.ServerStateExit, s.noabort)
+	cluster.DeadNode()
 	zlog.Warn("server exit")
 	os.Exit(0)
 }
