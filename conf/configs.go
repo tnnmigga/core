@@ -11,7 +11,7 @@ import (
 )
 
 func init() {
-	
+
 }
 
 var (
@@ -23,12 +23,11 @@ var errConfigNotFound error = errors.New("configs not found")
 
 func LoadFromJSON(b []byte) {
 	b = uncomment(b)
-	tmp := map[string]any{}
-	err := json.Unmarshal(b, &tmp)
+	err := json.Unmarshal(b, &confs)
 	if err != nil {
 		log.Fatalf("LoadFromJSON unmarshal error %v", err)
 	}
-	transform(tmp, confs, nil)
+	// transform(tmp, confs, nil)
 	afterLoad()
 }
 
@@ -38,7 +37,7 @@ func LoadFromYAML(b []byte) {
 	if err != nil {
 		log.Fatalf("LoadFromYAML unmarshal error %v", err)
 	}
-	transform(tmp, confs, nil)
+	// transform(tmp, confs, nil)
 	afterLoad()
 }
 
@@ -53,16 +52,16 @@ func RegInitFn(fn func()) {
 	fns = append(fns, fn)
 }
 
-func transform(oc map[string]any, nc map[string]any, prefix []string) {
-	for k, v := range oc {
-		switch v := v.(type) {
-		case map[string]any:
-			transform(v, nc, append(prefix, k))
-		default:
-			nc[strings.Join(append(prefix, k), ".")] = oc[k]
-		}
-	}
-}
+// func transform(oc map[string]any, nc map[string]any, prefix []string) {
+// 	for k, v := range oc {
+// 		switch v := v.(type) {
+// 		case map[string]any:
+// 			transform(v, nc, append(prefix, k))
+// 		default:
+// 			nc[strings.Join(append(prefix, k), ".")] = oc[k]
+// 		}
+// 	}
+// }
 
 func afterLoad() {
 	initServerConf()
@@ -72,100 +71,140 @@ func afterLoad() {
 }
 
 type vType interface {
-	float64 | bool | string
+	float64 | bool | string | map[string]any | []any
 }
 
 func Any[T vType](name string) (v T, ok bool) {
-	if v, has := confs[name]; has {
-		return v.(T), true // 允许不存在, 不允许类型错误
+	path := strings.Split(name, ".")
+	var next any = confs
+	for _, n := range path {
+		tmp, ok := next.(map[string]any)
+		if !ok {
+			return v, false
+		}
+		next, ok = tmp[n]
+		if !ok {
+			return v, false
+		}
 	}
-	return v, false
+	// 类型错误触发panic中断
+	return next.(T), true
 }
 
-func Int(name string, defaultVal ...int) int {
+func Int(name string, default_ ...int) int {
 	v, ok := Any[float64](name)
 	if ok {
 		return int(v)
 	}
-	if len(defaultVal) > 0 {
-		return defaultVal[0]
+	if len(default_) > 0 {
+		return default_[0]
 	}
 	panic(errConfigNotFound)
 }
 
-func Int64(name string, defaultVal ...int64) int64 {
+func Int64(name string, default_ ...int64) int64 {
 	v, ok := Any[float64](name)
 	if ok {
 		return int64(v)
 	}
-	if len(defaultVal) > 0 {
-		return defaultVal[0]
+	if len(default_) > 0 {
+		return default_[0]
 	}
 	panic(errConfigNotFound)
 }
 
-func Int32(name string, defaultVal ...int32) int32 {
+func Int32(name string, default_ ...int32) int32 {
 	v, ok := Any[float64](name)
 	if ok {
 		return int32(v)
 	}
-	if len(defaultVal) > 0 {
-		return defaultVal[0]
+	if len(default_) > 0 {
+		return default_[0]
 	}
 	panic(errConfigNotFound)
 }
 
-func Uint64(name string, defaultVal ...uint64) uint64 {
+func Uint64(name string, default_ ...uint64) uint64 {
 	v, ok := Any[float64](name)
 	if ok {
 		return uint64(v)
 	}
-	if len(defaultVal) > 0 {
-		return defaultVal[0]
+	if len(default_) > 0 {
+		return default_[0]
 	}
 	panic(errConfigNotFound)
 }
 
-func Uint32(name string, defaultVal ...uint32) uint32 {
+func Uint32(name string, default_ ...uint32) uint32 {
 	v, ok := Any[float64](name)
 	if ok {
 		return uint32(v)
 	}
-	if len(defaultVal) > 0 {
-		return defaultVal[0]
+	if len(default_) > 0 {
+		return default_[0]
 	}
 	panic(errConfigNotFound)
 }
 
-func String(name string, defaultVal ...string) string {
+func String(name string, default_ ...string) string {
 	v, ok := Any[string](name)
 	if ok {
 		return string(v)
 	}
-	if len(defaultVal) > 0 {
-		return defaultVal[0]
+	if len(default_) > 0 {
+		return default_[0]
 	}
 	panic(errConfigNotFound)
 }
 
-func Float64(name string, defaultVal ...float64) float64 {
+func Float64(name string, default_ ...float64) float64 {
 	v, ok := Any[float64](name)
 	if ok {
 		return v
 	}
-	if len(defaultVal) > 0 {
-		return defaultVal[0]
+	if len(default_) > 0 {
+		return default_[0]
 	}
 	panic(errConfigNotFound)
 }
 
-func Bool(name string, defaultVal ...bool) bool {
+func Bool(name string, default_ ...bool) bool {
 	v, ok := Any[bool](name)
 	if ok {
 		return v
 	}
-	if len(defaultVal) > 0 {
-		return defaultVal[0]
+	if len(default_) > 0 {
+		return default_[0]
+	}
+	panic(errConfigNotFound)
+}
+
+func Array[T vType](name string, default_ ...[]T) []T {
+	a, ok := Any[[]any](name)
+	if ok {
+		ar := make([]T, len(a))
+		for i, v := range a {
+			ar[i] = v.(T)
+		}
+		return ar
+	}
+	if len(default_) > 0 {
+		return default_[0]
+	}
+	panic(errConfigNotFound)
+}
+
+func Map[T vType](name string, default_ ...map[string]T) map[string]T {
+	a, ok := Any[map[string]any](name)
+	if ok {
+		m := make(map[string]T, len(a))
+		for k, v := range a {
+			m[k] = v.(T)
+		}
+		return m
+	}
+	if len(default_) > 0 {
+		return default_[0]
 	}
 	panic(errConfigNotFound)
 }
