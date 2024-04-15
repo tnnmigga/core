@@ -1,21 +1,25 @@
 package idef
 
+// 普通投递消息(若对方不在线则丢弃)
 type CastPackage struct {
 	ServerID uint32
 	Body     any
 }
 
+// 通过流投递消息(持续到消息被消费)
 type StreamCastPackage struct {
 	ServerID uint32
 	Body     any
 	Header   map[string]string
 }
 
+// 广播给某一类进程
 type BroadcastPackage struct {
 	ServerType string
 	Body       any
 }
 
+// 随机投递到某一类进程中的一个上
 type RandomCastPackage struct {
 	ServerType string
 	Body       any
