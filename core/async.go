@@ -14,3 +14,4 @@ func Async[T any](m idef.IModule, f func() (T, error), cb func(T, error)) {
 		cb(a.(T), err)
 	})
 }
+

@@ -16,30 +16,31 @@ var (
 	ErrNodeIsExists = errors.New("node already exists")
 )
 
+var (
+	etcdCli *etcd.Client
+	ticker  *time.Ticker
+)
+
 const (
-	nodeTTL = 10 * time.Second
+	leaseTTL   = 10
+	opTimeout = 10 * time.Second
 )
 
 func etcdNodeKey() string {
 	return fmt.Sprintf("nett/nodes/%d", conf.ServerID)
 }
 
-var (
-	etcdCli *etcd.Client
-	ticker  *time.Ticker
-)
-
 func InitNode() error {
 	cli, err := etcd.New(etcd.Config{
 		Endpoints:   conf.Array("etcd.endpoints", []string{"http://localhost:2379"}),
-		DialTimeout: nodeTTL,
+		DialTimeout: opTimeout,
 	})
 	if err != nil {
 		return err
 	}
-	ctx, cancel := context.WithTimeout(context.Background(), nodeTTL)
+	ctx, cancel := context.WithTimeout(context.Background(), opTimeout)
 	defer cancel()
-	lease, err := cli.Grant(ctx, 10)
+	lease, err := cli.Grant(ctx, leaseTTL)
 	if err != nil {
 		return err
 	}
@@ -53,12 +54,12 @@ func InitNode() error {
 	if !putRes.Succeeded {
 		return ErrNodeIsExists
 	}
-	ticker = time.NewTicker(nodeTTL / 2)
+	ticker = time.NewTicker(leaseTTL * time.Second / 2)
 	go func() {
 		defer zlog.Infof("etcd keep alive goroutine exit")
 		for range ticker.C {
 			zlog.Debugf("etcd keep alive %d", lease.ID)
-			ctx, cancel := context.WithTimeout(context.Background(), nodeTTL/2)
+			ctx, cancel := context.WithTimeout(context.Background(), opTimeout/2)
 			_, err := etcdCli.KeepAliveOnce(ctx, lease.ID)
 			cancel()
 			// 若etcd异常则退出
@@ -80,7 +81,7 @@ func DeadNode() {
 	if etcdCli == nil {
 		return
 	}
-	ctx, cancel := context.WithTimeout(context.Background(), nodeTTL)
+	ctx, cancel := context.WithTimeout(context.Background(), opTimeout)
 	defer cancel()
 	_, err := etcdCli.Delete(ctx, etcdNodeKey())
 	if err != nil {
