@@ -8,7 +8,7 @@ import (
 	"github.com/tnnmigga/nett/idef"
 	"github.com/tnnmigga/nett/infra/zlog"
 	"github.com/tnnmigga/nett/msgbus"
-	"github.com/tnnmigga/nett/util"
+	"github.com/tnnmigga/nett/utils"
 )
 
 const (
@@ -48,7 +48,7 @@ func (m *Module) Assign(msg any) {
 	select {
 	case m.mq <- msg:
 	default:
-		zlog.Errorf("modele %s mq full, lose %s", m.name, util.String(msg))
+		zlog.Errorf("modele %s mq full, lose %s", m.name, utils.String(msg))
 	}
 }
 
@@ -96,7 +96,7 @@ func (m *Module) Stop() {
 }
 
 func (m *Module) cb(msg any) {
-	defer util.RecoverPanic()
+	defer utils.RecoverPanic()
 	msgType := reflect.TypeOf(msg)
 	h, ok := m.handlers[msgType]
 	if !ok {
@@ -105,7 +105,7 @@ func (m *Module) cb(msg any) {
 	}
 	fn, ok := h.(func(any))
 	if !ok {
-		zlog.Errorf("%s %s cb type error", m.name, util.TypeName(msg))
+		zlog.Errorf("%s %s cb type error", m.name, utils.TypeName(msg))
 	}
 	fn(msg)
 }
@@ -122,7 +122,7 @@ type asyncContext struct {
 // 匿名函数捕获的变量需要防范并发读写问题
 func (m *Module) Async(f func() (any, error), cb func(any, error)) {
 	core.Go(func() {
-		defer util.RecoverPanic()
+		defer utils.RecoverPanic()
 		res, err := f()
 		m.Assign(&asyncContext{
 			res: res,

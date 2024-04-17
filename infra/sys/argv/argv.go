@@ -3,7 +3,7 @@ package argv
 import (
 	"os"
 
-	"github.com/tnnmigga/nett/util"
+	"github.com/tnnmigga/nett/utils"
 	"golang.org/x/exp/constraints"
 )
 
@@ -13,13 +13,13 @@ func Int[T constraints.Integer](default_ T, names ...string) T {
 	if value == "" {
 		return default_
 	}
-	return util.Integer[T](value)
+	return utils.Integer[T](value)
 }
 
 // 查找命令行参数中的指定参数
 func Str(default_ string, names ...string) string {
 	for _, name := range names {
-		if index := util.Index(os.Args[1:], name); index != -1 {
+		if index := utils.Index(os.Args[1:], name); index != -1 {
 			return os.Args[index+2]
 		}
 	}
@@ -29,7 +29,7 @@ func Str(default_ string, names ...string) string {
 // 查找是否存在指定名称的命令行参数
 func Find(names ...string) bool {
 	for _, name := range names {
-		if util.Index(os.Args[1:], name) != -1 {
+		if utils.Index(os.Args[1:], name) != -1 {
 			return true
 		}
 	}

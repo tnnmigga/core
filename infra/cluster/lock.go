@@ -2,12 +2,19 @@ package cluster
 
 import (
 	"context"
+	"errors"
 	"fmt"
-	"sync"
 	"sync/atomic"
 	"time"
 
+	"github.com/tnnmigga/nett/infra/zlog"
+	"github.com/tnnmigga/nett/utils"
 	etcd "go.etcd.io/etcd/client/v3"
+)
+
+var (
+	ErrLockIsLocked = errors.New("etcd lock locked")
+	ErrLockFaild    = errors.New("etcd lock faild")
 )
 
 func etcdLockKey(name string) string {
@@ -15,45 +22,69 @@ func etcdLockKey(name string) string {
 }
 
 type globalLock struct {
-	lockKey string
-	flag    atomic.Bool
-	rw      sync.RWMutex
-	cancel  func()
-	leaseID etcd.LeaseID
+	locked    atomic.Bool
+	lockKey   string
+	cancelCtx utils.IContextWithCancel
+	leaseID   etcd.LeaseID
 }
 
 func NewLock(name string) *globalLock {
 	return &globalLock{
-		lockKey: etcdLockKey(name),
+		lockKey:   etcdLockKey(name),
+		cancelCtx: utils.ContextWithCancel(context.Background()),
 	}
 }
 
-func (l *globalLock) Try() bool {
+func (l *globalLock) tryLock() error {
+	if l.locked.Load() {
+		return ErrLockIsLocked
+	}
+	cli := clusterNode.etcdClient
 	ctx, cancel := context.WithTimeout(context.Background(), opTimeout)
 	defer cancel()
-	if l.leaseID == 0 {
-		lease, err := etcdCli.Grant(ctx, leaseTTL)
-		
+	lease, err := clusterNode.etcdClient.Grant(ctx, leaseTTL)
+	if err != nil {
+		zlog.Errorf("etcd grant error: %v", err)
+		return err
 	}
-	etcdCli.Revoke()
-	txn := etcdCli.Txn(ctx).If(etcd.Compare(etcd.Version(etcdNodeKey()), "=", 0)).Then(etcd.OpPut(l.lockKey, "", etcd.WithLease(l.leaseID)))
-	l.rw.Lock()
-}
-
-func (l *globalLock) Wait(timeout ...time.Duration) bool {
-	l.rw.Lock()
-}
-
-func (l *globalLock) While(retries ...int) bool {
-	l.rw.Unlock()
-}
-
-func (l *globalLock) LockAndDo(f func(error), timeout ...time.Duration) bool {
-	if l.cancel != nil {
-		l.cancel()
+	txn := cli.Txn(ctx).If(etcd.Compare(etcd.Version(l.lockKey), "=", 0)).
+		Then(etcd.OpPut(l.lockKey, "", etcd.WithLease(lease.ID)))
+	resp, err := txn.Commit()
+	if err != nil {
+		return err
 	}
+	if !resp.Succeeded {
+		_, err := cli.Revoke(ctx, lease.ID)
+		if err != nil {
+			zlog.Errorf("etcd revoke error: %v", err)
+		}
+		return err
+	}
+	_, err = cli.KeepAlive(l.cancelCtx, lease.ID)
+	if err != nil {
+		zlog.Errorf("etcd keepalive error: %v", err)
+		return err
+	}
+	return nil
+}
+
+func (l *globalLock) Wait(timeout ...time.Duration) error {
+	return nil
+}
+
+func (l *globalLock) Locked() bool {
+	return l.locked.Load()
+}
+
+func (l *globalLock) While(retries ...int) error {
+	return nil
+}
+
+func (l *globalLock) LockAndDo(f func(error), timeout ...time.Duration) error {
+	return nil
 }
 
 func (l *globalLock) Release() {
-	l.rw.Unlock()
+	l.cancelCtx.Cancel()
+	clusterNode.etcdClient.Delete(context.Background(), l.lockKey)
 }

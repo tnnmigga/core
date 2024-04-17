@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/tnnmigga/nett/infra/zlog"
-	"github.com/tnnmigga/nett/util"
+	"github.com/tnnmigga/nett/utils"
 )
 
 var (
@@ -67,7 +67,7 @@ func (w *worker) work() {
 	for {
 		select {
 		case fn := <-w.pending:
-			util.ExecAndRecover(fn)
+			utils.ExecAndRecover(fn)
 			w.count--
 		default:
 			wkg.mu.Lock()
@@ -87,20 +87,20 @@ func (w *worker) work() {
 
 // 开启一个受到一定监督的协程
 // 若fn参数包含context.Context类型, 当系统准备退出时, 此ctx会Done, 此时必须退出协程
-// 系统会等候所有由Go开辟的协程退出后再退出 
+// 系统会等候所有由Go开辟的协程退出后再退出
 func Go[T gocall](fn T) {
 	switch f := any(fn).(type) {
 	case func(context.Context):
 		wg.Add(1)
 		go func() {
-			defer util.RecoverPanic()
+			defer utils.RecoverPanic()
 			defer wg.Done()
 			f(rootCtx)
 		}()
 	case func():
 		wg.Add(1)
 		go func() {
-			defer util.RecoverPanic()
+			defer utils.RecoverPanic()
 			defer wg.Done()
 			f()
 		}()

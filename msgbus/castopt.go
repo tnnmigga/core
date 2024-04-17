@@ -5,7 +5,7 @@ import (
 
 	"github.com/tnnmigga/nett/conf"
 	"github.com/tnnmigga/nett/idef"
-	"github.com/tnnmigga/nett/util"
+	"github.com/tnnmigga/nett/utils"
 )
 
 type castOpt struct {
@@ -53,7 +53,7 @@ func ServerType(serverType string) castOpt {
 func Expires(expires time.Duration) castOpt {
 	return castOpt{
 		key:   idef.ConstKeyExpires,
-		value: int64(util.NowNs() + expires),
+		value: int64(utils.NowNs() + expires),
 	}
 }
 

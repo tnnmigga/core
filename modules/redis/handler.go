@@ -7,7 +7,7 @@ import (
 
 	"github.com/tnnmigga/nett/core"
 	"github.com/tnnmigga/nett/msgbus"
-	"github.com/tnnmigga/nett/util"
+	"github.com/tnnmigga/nett/utils"
 
 	"github.com/go-redis/redis/v8"
 )
@@ -29,7 +29,7 @@ func (m *module) onExec(req *Exec, resolve func(any), reject func(error)) {
 		key = req.Cmd[1].(string)
 	}
 	core.GoWithGroup(key, func() {
-		ctx, cancel := context.WithTimeout(context.Background(), util.IfElse(req.Timeout > 0, req.Timeout, 3*time.Second))
+		ctx, cancel := context.WithTimeout(context.Background(), utils.IfElse(req.Timeout > 0, req.Timeout, 3*time.Second))
 		defer cancel()
 		cmd := m.cli.Do(ctx, req.Cmd...)
 		result, err := cmd.Result()
@@ -47,7 +47,7 @@ func (m *module) onExecMulti(req *ExecMulti, resolve func(any), reject func(erro
 		return
 	}
 	core.GoWithGroup(req.Key, func() {
-		ctx, cancel := context.WithTimeout(context.Background(), util.IfElse(req.Timeout > 0, req.Timeout, 3*time.Second))
+		ctx, cancel := context.WithTimeout(context.Background(), utils.IfElse(req.Timeout > 0, req.Timeout, 3*time.Second))
 		defer cancel()
 		pipe := m.cli.TxPipeline()
 		cmders := make([]*redis.Cmd, 0, len(req.Cmds))

@@ -12,7 +12,7 @@ import (
 	"github.com/tnnmigga/nett/infra/zlog"
 	"github.com/tnnmigga/nett/modules/basic"
 	"github.com/tnnmigga/nett/msgbus"
-	"github.com/tnnmigga/nett/util"
+	"github.com/tnnmigga/nett/utils"
 
 	"github.com/nats-io/nats.go"
 	"github.com/nats-io/nats.go/jetstream"
@@ -144,14 +144,14 @@ func (m *module) afterStop() error {
 }
 
 func (m *module) streamMsgHandler(msg jetstream.Msg) {
-	defer util.RecoverPanic()
+	defer utils.RecoverPanic()
 	msg.Ack()
 	if expires := msg.Headers().Get(idef.ConstKeyExpires); expires != "" {
 		// 检测部分不重要但有一定时效性的消息是否超时
 		// 比如往客户端推送的实时消息
 		// 超时后直接丢弃
 		n, err := strconv.Atoi(expires)
-		if err == nil && util.NowNs() > time.Duration(n) {
+		if err == nil && utils.NowNs() > time.Duration(n) {
 			zlog.Debugf("message expired")
 			return
 		}
@@ -165,7 +165,7 @@ func (m *module) streamMsgHandler(msg jetstream.Msg) {
 }
 
 func (m *module) msgHandler(msg *nats.Msg) {
-	defer util.RecoverPanic()
+	defer utils.RecoverPanic()
 	pkg, err := codec.Decode(msg.Data)
 	if err != nil {
 		zlog.Errorf("nats recv decode msg error: %v", err)
@@ -175,7 +175,7 @@ func (m *module) msgHandler(msg *nats.Msg) {
 }
 
 func (m *module) rpcHandler(msg *nats.Msg) {
-	defer util.RecoverPanic()
+	defer utils.RecoverPanic()
 	req, err := codec.Decode(msg.Data)
 	rpcResp := &RPCResult{}
 	if err != nil {

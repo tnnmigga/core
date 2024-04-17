@@ -1,4 +1,4 @@
-package util
+package utils
 
 import (
 	"reflect"
@@ -7,7 +7,7 @@ import (
 	"strings"
 
 	"github.com/tnnmigga/nett/infra/zlog"
-	"github.com/tnnmigga/nett/util/idgen"
+	"github.com/tnnmigga/nett/utils/idgen"
 )
 
 func RecoverPanic() {

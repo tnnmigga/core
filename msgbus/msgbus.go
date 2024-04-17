@@ -10,7 +10,7 @@ import (
 	"github.com/tnnmigga/nett/core"
 	"github.com/tnnmigga/nett/idef"
 	"github.com/tnnmigga/nett/infra/zlog"
-	"github.com/tnnmigga/nett/util"
+	"github.com/tnnmigga/nett/utils"
 
 	"reflect"
 )
@@ -71,7 +71,7 @@ func Cast(msg any, opts ...castOpt) {
 func castLocal(msg any, opts ...castOpt) {
 	recvs, ok := recvers[reflect.TypeOf(msg)]
 	if !ok {
-		zlog.Errorf("message cast recv not fuound %v", util.TypeName(msg))
+		zlog.Errorf("message cast recv not fuound %v", utils.TypeName(msg))
 		return
 	}
 	modName := findCastOpt[idef.ModName](opts, idef.ConstKeyOneOfMods, "")
@@ -117,7 +117,7 @@ func RPC[T any](caller idef.IModule, target castOpt, req any, cb func(resp T, er
 	rpcCtx := &idef.RPCContext{
 		Caller: caller,
 		Req:    req,
-		Resp:   util.New[T](),
+		Resp:   utils.New[T](),
 		Cb:     warpCb(cb),
 	}
 	if target.key == idef.ConstKeyServerID {
@@ -134,7 +134,7 @@ func RPC[T any](caller idef.IModule, target castOpt, req any, cb func(resp T, er
 func localCall(m idef.IModule, req any, cb func(resp any, err error)) {
 	recvs, ok := recvers[reflect.TypeOf(req)]
 	if !ok {
-		zlog.Errorf("recvs not fuound %v", util.TypeName(req))
+		zlog.Errorf("recvs not fuound %v", utils.TypeName(req))
 		return
 	}
 	core.Go(func() {

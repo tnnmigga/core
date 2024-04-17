@@ -8,8 +8,8 @@ import (
 	"github.com/tnnmigga/nett/core"
 	"github.com/tnnmigga/nett/idef"
 	"github.com/tnnmigga/nett/msgbus"
-	"github.com/tnnmigga/nett/util"
-	"github.com/tnnmigga/nett/util/idgen"
+	"github.com/tnnmigga/nett/utils"
+	"github.com/tnnmigga/nett/utils/idgen"
 
 	"time"
 )
@@ -24,7 +24,7 @@ type timerCtx struct {
 }
 
 func (t *timerCtx) String() string {
-	return fmt.Sprintf("{ID: %d, Time: %d, Body: %s}", t.ID, t.Time, util.String(t.Ctx))
+	return fmt.Sprintf("{ID: %d, Time: %d, Body: %s}", t.ID, t.Time, utils.String(t.Ctx))
 }
 
 func (t *timerCtx) Key() uint64 {
@@ -52,7 +52,7 @@ func NewTimerHeap(m idef.IModule) *TimerHeap {
 func (h *TimerHeap) New(delay time.Duration, ctx any) uint64 {
 	t := &timerCtx{
 		ID:   idgen.NewUUID(),
-		Time: util.NowNs() + delay,
+		Time: utils.NowNs() + delay,
 		Ctx:  ctx,
 	}
 	top := h.Top()
@@ -82,12 +82,12 @@ func (h *TimerHeap) tryNextTrigger() {
 	if top == nil {
 		return
 	}
-	nowNs := util.NowNs()
+	nowNs := utils.NowNs()
 	if top.Time <= nowNs {
 		h.trigger()
 		return
 	}
-	h.timer = time.NewTimer(time.Duration(top.Time - util.NowNs()))
+	h.timer = time.NewTimer(time.Duration(top.Time - utils.NowNs()))
 	core.Go(func(ctx context.Context) {
 		select {
 		case <-ctx.Done():

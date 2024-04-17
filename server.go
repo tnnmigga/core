@@ -13,12 +13,12 @@ import (
 	"github.com/tnnmigga/nett/infra/sys/argv"
 	"github.com/tnnmigga/nett/infra/zlog"
 	"github.com/tnnmigga/nett/modules/link"
-	"github.com/tnnmigga/nett/util"
+	"github.com/tnnmigga/nett/utils"
 )
 
 func init() {
 	fname := argv.Str("configs.jsonc", "-c", "--config")
-	conf.LoadFromJSON(util.ReadFile(fname))
+	conf.LoadFromJSON(utils.ReadFile(fname))
 	zlog.Init()
 }
 
@@ -65,7 +65,7 @@ func (s *Server) onStop() {
 	core.WaitGoDone(time.Minute)
 	for i := len(s.modules) - 1; i >= 0; i-- {
 		m := s.modules[i]
-		util.ExecAndRecover(m.Stop)
+		utils.ExecAndRecover(m.Stop)
 	}
 	s.wg.Wait()
 	zlog.Warn("server stoped")
@@ -86,7 +86,7 @@ func (s *Server) Shutdown() {
 func (s *Server) runModule(wg *sync.WaitGroup, m idef.IModule) {
 	wg.Add(1)
 	go func() {
-		defer util.RecoverPanic()
+		defer utils.RecoverPanic()
 		defer wg.Done()
 		m.Run()
 	}()
@@ -112,11 +112,11 @@ func (s *Server) waitMsgHandling(maxWaitTime time.Duration) {
 }
 
 func (s *Server) abort(m idef.IModule, err error) {
-	zlog.Fatalf("module %s, on %s, error: %v", m.Name(), util.Caller(3), err)
+	zlog.Fatalf("module %s, on %s, error: %v", m.Name(), utils.Caller(3), err)
 }
 
 func (s *Server) noabort(m idef.IModule, err error) {
-	zlog.Errorf("module %s, on %s, error: %v", m.Name(), util.Caller(3), err)
+	zlog.Errorf("module %s, on %s, error: %v", m.Name(), utils.Caller(3), err)
 }
 
 func (s *Server) before(state idef.ServerState, onError ...func(idef.IModule, error)) {

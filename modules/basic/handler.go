@@ -6,7 +6,7 @@ import (
 
 	"github.com/tnnmigga/nett/idef"
 	"github.com/tnnmigga/nett/infra/zlog"
-	"github.com/tnnmigga/nett/util"
+	"github.com/tnnmigga/nett/utils"
 )
 
 func (m *Module) onRPCRequest(req *idef.RPCRequest) {
@@ -18,7 +18,7 @@ func (m *Module) onRPCRequest(req *idef.RPCRequest) {
 	}
 	fn, ok := h.(func(any, func(any), func(error)))
 	if !ok {
-		zlog.Errorf("%s %s rpc type error", m.name, util.TypeName(req))
+		zlog.Errorf("%s %s rpc type error", m.name, utils.TypeName(req))
 	}
 	fn(req.Req, func(v any) {
 		req.Resp <- v
