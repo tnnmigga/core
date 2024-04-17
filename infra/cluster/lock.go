@@ -17,6 +17,10 @@ var (
 	ErrLockFaild    = errors.New("etcd lock faild")
 )
 
+type lockWatcher struct {
+	
+}
+
 func etcdLockKey(name string) string {
 	return fmt.Sprintf("nett/lock/%s", name)
 }

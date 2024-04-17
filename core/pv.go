@@ -1,18 +1,23 @@
 package core
 
 // 信号量 PV操作
-type Semaphore struct {
+type Semaphore interface {
+	P()
+	V()
+}
+
+type semaphore struct {
 	count chan struct{}
 }
 
-func NewSemaphore(n int) *Semaphore {
-	return &Semaphore{count: make(chan struct{}, n)}
+func NewSemaphore(n int) Semaphore {
+	return &semaphore{count: make(chan struct{}, n)}
 }
 
-func (s *Semaphore) P() {
+func (s *semaphore) P() {
 	s.count <- struct{}{}
 }
 
-func (s *Semaphore) V() {
+func (s *semaphore) V() {
 	<-s.count
 }

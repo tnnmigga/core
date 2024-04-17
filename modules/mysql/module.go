@@ -12,7 +12,7 @@ const MaxConcurrency = 0xFF
 
 type module struct {
 	*basic.Module
-	semaphore *core.Semaphore // 控制并发数
+	semaphore core.Semaphore // 控制并发数
 	gormDB    *gorm.DB
 	mysqlDSN  string
 }

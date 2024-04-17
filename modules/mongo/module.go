@@ -17,8 +17,8 @@ const MaxConcurrency = 0xFF
 
 type module struct {
 	*basic.Module
-	semaphore *core.Semaphore // 控制并发数
-	mongoCli  *mongo.Client   // mongo
+	semaphore core.Semaphore // 控制并发数
+	mongoCli  *mongo.Client  // mongo
 	mongoURI  string
 }
 
