@@ -1,7 +1,6 @@
 package basic
 
 import (
-	"fmt"
 	"reflect"
 
 	"github.com/tnnmigga/nett/core"
@@ -56,7 +55,7 @@ func (m *Module) RegisterHandler(mType reflect.Type, handler any) {
 	_, ok := m.handlers[mType]
 	if ok {
 		// 一个module内一个msg只能被注册一次, 但不同模块可以分别注册监听同一个消息
-		zlog.Fatal(fmt.Errorf("RegisterHandler multiple registration %v", mType))
+		zlog.Panicf("RegisterHandler multiple registration %v", mType)
 	}
 	m.handlers[mType] = handler
 }
@@ -67,14 +66,14 @@ func (m *Module) Hook(state idef.ServerState, stage int) []func() error {
 
 func (m *Module) Before(state idef.ServerState, hook func() error) {
 	if state <= idef.ServerStateInit {
-		zlog.Fatal("module after close hook not support")
+		zlog.Panic("module after close hook not support")
 	}
 	m.hooks[state][0] = append(m.hooks[state][0], hook)
 }
 
 func (m *Module) After(state idef.ServerState, hook func() error) {
 	if state >= idef.ServerStateExit {
-		zlog.Fatal("module after close hook not support")
+		zlog.Panic("module after close hook not support")
 	}
 	m.hooks[state][1] = append(m.hooks[state][1], hook)
 }
@@ -114,6 +113,10 @@ type asyncContext struct {
 	res any
 	err error
 	cb  func(any, error)
+}
+
+func (c *asyncContext) DeepCopy() interface{} {
+	return c // 不需要深拷贝
 }
 
 // 异步回调的方式执行函数

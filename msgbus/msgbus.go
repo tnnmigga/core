@@ -3,6 +3,7 @@ package msgbus
 import (
 	"errors"
 	"fmt"
+	"sync"
 	"time"
 
 	"github.com/mohae/deepcopy"
@@ -27,6 +28,7 @@ func init() {
 
 var (
 	recvers map[reflect.Type][]IRecver
+	rw      sync.RWMutex
 	// rpcMaxWaitTime time.Duration
 )
 

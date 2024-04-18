@@ -1,7 +1,6 @@
 package msgbus
 
 import (
-	"fmt"
 	"reflect"
 
 	"github.com/tnnmigga/nett/codec"
@@ -33,10 +32,12 @@ func RegisterRPC[T any](m idef.IModule, fn func(msg T, resolve func(any), reject
 
 // 注册消息接收者
 func registerRecver(mType reflect.Type, recver IRecver) {
+	rw.Lock()
+	defer rw.Unlock()
 	if ms, has := recvers[mType]; has {
 		for _, m := range ms {
 			if m.Name() == recver.Name() {
-				zlog.Fatal(fmt.Errorf("message duplicate registration %v %v", recver.Name(), mType.Elem().Name()))
+				zlog.Panicf("message duplicate registration %v %v", recver.Name(), mType.Elem().Name())
 			}
 		}
 	}

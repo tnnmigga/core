@@ -20,8 +20,9 @@ var (
 )
 
 const (
-	leaseTTL  = 10
-	opTimeout = 10 * time.Second
+	leaseTTL   = 10
+	opTimeout  = 10 * time.Second
+	nodePrefix = "/cluster/nodes"
 )
 
 var clusterNode *Node
@@ -30,6 +31,7 @@ type Node struct {
 	etcdClient *etcd.Client
 	leaseID    etcd.LeaseID
 	cancelCtx  utils.IContextWithCancel
+	waitLocks  waitLockManager
 }
 
 func (n *Node) KeepAlive() {
@@ -64,7 +66,7 @@ func (n *Node) KeepAlive() {
 }
 
 func etcdNodeKey() string {
-	return fmt.Sprintf("nett/nodes/%d", conf.ServerID)
+	return fmt.Sprintf("%s/%d", nodePrefix, conf.ServerID)
 }
 
 func InitNode() error {

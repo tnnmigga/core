@@ -49,7 +49,7 @@ func Register[T any](t ...T) {
 	id := utils.TypeID(v)
 	if desc, has := msgIDToDesc[id]; has {
 		if desc.MessageName != name {
-			zlog.Fatalf("msgid duplicat %v %d", name, id)
+			zlog.Panicf("msgid duplicat %v %d", name, id)
 		}
 	}
 	mType := reflect.TypeOf(v)
