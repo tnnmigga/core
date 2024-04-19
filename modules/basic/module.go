@@ -125,7 +125,6 @@ func (c *asyncContext) DeepCopy() interface{} {
 // 匿名函数捕获的变量需要防范并发读写问题
 func (m *Module) Async(f func() (any, error), cb func(any, error)) {
 	conc.Go(func() {
-		defer utils.RecoverPanic()
 		res, err := f()
 		m.Assign(&asyncContext{
 			res: res,

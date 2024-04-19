@@ -36,6 +36,7 @@ func newWaitLockManager(ctx context.Context, cli *etcd.Client) *waitLockManager 
 	manager := &waitLockManager{
 		waitQueue: make(map[string][]*globalLock),
 		watcher:   watcher,
+		ctx:       ctx,
 	}
 	go manager.watch()
 	return &waitLockManager{
