@@ -3,7 +3,7 @@ import sys
 
 path = ""
 name = ""
-
+pkg = ""
 
 def readFile(name):
     with open(name, "r") as f:
@@ -24,9 +24,10 @@ def genUseCase():
     package %s
 
     import (
-    	"east/core/idef"
-        "east/game/play/domain"
-        "east/game/play/domain/api"
+        "%s/%s/domain"
+        "%s/%s/domain/api"
+
+        "github.com/tnnmigga/nett/idef"
     )
 
     type useCase struct {
@@ -45,7 +46,7 @@ def genUseCase():
         return nil
     }
 
-    ''' % (name.lower(), name)
+    ''' % (name.lower(), pkg, path, pkg, path, name)
     dirname = path + "/domain/impl/" + name.lower()
     writeFile(dirname + "/usecase.go", text)
 
@@ -63,15 +64,17 @@ def genApi():
 def genDomain():
     global path, name
     text = readFile(path + "/domain/domain.go")
-    index = text.find("MaxCaseIndex", 250, len(text))
+    index = text.find("MaxCaseIndex", 300, len(text))
     text = text[:index] + name + "CaseIndex\n" + text[index:]
-    writeFile(path + "domain/domain.go", text)
+    writeFile(path + "/domain/domain.go", text)
 
 def genImpl():
     global path, name
-    text = readFile(path + "/domain/impl/impl.go")
-    text = text[:-3] + "d.PutCase(domain.{}CaseIndex, {}.New(d))".format(name, name.lower()) + text[-3:]
-    writeFile(path + "domain/domain.go", text)
+    text = readFile(path + "/domain/impl/impl.go").strip()
+    text = text[:-1] + "d.PutCase(domain.{}CaseIndex, {}.New(d))\n".format(name, name.lower()) + text[-1:]
+    index = text.find(")")
+    text = text[:index] + "\"{}/{}/domain/impl/{}\"\n".format(pkg, path, name.lower()) + text[index:]
+    writeFile(path + "/domain/impl/impl.go", text)
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
@@ -83,10 +86,12 @@ if __name__ == "__main__":
             name = value
         if key == "path":
             path = value
-            if path[-1] != "/":
-                path += "/"
+            if path[-1] == "/":
+                path = path[:-1]
     dirname = path + "/domain/impl/" + name.lower()
-    print(dirname)
+    mod = readFile("./go.mod")
+    mod = mod.strip()
+    pkg = mod.split("\n")[0].split(" ")[1].strip()
     if os.path.exists(dirname):
         print("useCase already exists")
         exit()
