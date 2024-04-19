@@ -1,4 +1,4 @@
-package core
+package conc
 
 // 信号量 PV操作
 type Semaphore interface {

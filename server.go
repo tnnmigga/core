@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/tnnmigga/nett/conf"
-	"github.com/tnnmigga/nett/core"
+	"github.com/tnnmigga/nett/conc"
 	"github.com/tnnmigga/nett/idef"
 	"github.com/tnnmigga/nett/infra/cluster"
 	"github.com/tnnmigga/nett/infra/process"
@@ -64,7 +64,7 @@ func (s *Server) onStop() {
 	s.before(idef.ServerStateStop, s.record)
 	zlog.Warn("server try to stop")
 	s.waitMsgHandling(time.Minute)
-	core.WaitGoDone(time.Minute)
+	conc.WaitGoDone(time.Minute)
 	for i := len(s.modules) - 1; i >= 0; i-- {
 		m := s.modules[i]
 		utils.ExecAndRecover(m.Stop)

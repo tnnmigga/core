@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/tnnmigga/nett/core"
+	"github.com/tnnmigga/nett/conc"
 	"github.com/tnnmigga/nett/infra/zlog"
 	"github.com/tnnmigga/nett/msgbus"
 
@@ -22,7 +22,7 @@ func (m *module) onMongoSave(req *MongoSave) {
 		m := mongo.NewReplaceOneModel().SetFilter(op.Filter).SetReplacement(op.Value).SetUpsert(true)
 		ms = append(ms, m)
 	}
-	core.GoWithGroup(req.GroupKey, func() {
+	conc.GoWithGroup(req.GroupKey, func() {
 		m.semaphore.P()
 		defer m.semaphore.V()
 		ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
@@ -35,7 +35,7 @@ func (m *module) onMongoSave(req *MongoSave) {
 }
 
 func (m *module) onMongoLoad(req *MongoLoad, resolve func(any), reject func(error)) {
-	core.GoWithGroup(req.GroupKey, func() {
+	conc.GoWithGroup(req.GroupKey, func() {
 		m.semaphore.P()
 		defer m.semaphore.V()
 		cur, _ := m.mongoCli.Database(req.DBName).Collection(req.CollName).Find(context.Background(), req.Filter)

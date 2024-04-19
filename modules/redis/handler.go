@@ -5,7 +5,7 @@ import (
 	"errors"
 	"time"
 
-	"github.com/tnnmigga/nett/core"
+	"github.com/tnnmigga/nett/conc"
 	"github.com/tnnmigga/nett/msgbus"
 	"github.com/tnnmigga/nett/utils"
 
@@ -28,7 +28,7 @@ func (m *module) onExec(req *Exec, resolve func(any), reject func(error)) {
 	if key == "" {
 		key = req.Cmd[1].(string)
 	}
-	core.GoWithGroup(key, func() {
+	conc.GoWithGroup(key, func() {
 		ctx, cancel := context.WithTimeout(context.Background(), utils.IfElse(req.Timeout > 0, req.Timeout, 3*time.Second))
 		defer cancel()
 		cmd := m.cli.Do(ctx, req.Cmd...)
@@ -46,7 +46,7 @@ func (m *module) onExecMulti(req *ExecMulti, resolve func(any), reject func(erro
 		reject(ErrInvalidCmd)
 		return
 	}
-	core.GoWithGroup(req.Key, func() {
+	conc.GoWithGroup(req.Key, func() {
 		ctx, cancel := context.WithTimeout(context.Background(), utils.IfElse(req.Timeout > 0, req.Timeout, 3*time.Second))
 		defer cancel()
 		pipe := m.cli.TxPipeline()

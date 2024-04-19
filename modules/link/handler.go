@@ -6,7 +6,7 @@ import (
 
 	"github.com/tnnmigga/nett/codec"
 	"github.com/tnnmigga/nett/conf"
-	"github.com/tnnmigga/nett/core"
+	"github.com/tnnmigga/nett/conc"
 	"github.com/tnnmigga/nett/idef"
 	"github.com/tnnmigga/nett/infra/zlog"
 	"github.com/tnnmigga/nett/msgbus"
@@ -66,7 +66,7 @@ func (m *module) onRandomCastPackage(pkg *idef.RandomCastPackage) {
 
 func (m *module) onRPContext(ctx *idef.RPCContext) {
 	b := codec.Encode(ctx.Req)
-	core.Go(func() {
+	conc.Go(func() {
 		resp := &idef.RPCResponse{
 			Module: ctx.Caller,
 			Req:    ctx.Req,

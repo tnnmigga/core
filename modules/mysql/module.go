@@ -1,7 +1,7 @@
 package mysql
 
 import (
-	"github.com/tnnmigga/nett/core"
+	"github.com/tnnmigga/nett/conc"
 	"github.com/tnnmigga/nett/idef"
 	"github.com/tnnmigga/nett/modules/basic"
 	"gorm.io/driver/mysql"
@@ -12,7 +12,7 @@ const MaxConcurrency = 0xFF
 
 type module struct {
 	*basic.Module
-	semaphore core.Semaphore // 控制并发数
+	semaphore conc.Semaphore // 控制并发数
 	gormDB    *gorm.DB
 	mysqlDSN  string
 }
@@ -20,7 +20,7 @@ type module struct {
 func New(name idef.ModName, dsn string) idef.IModule {
 	m := &module{
 		Module:    basic.New(name, basic.DefaultMQLen),
-		semaphore: core.NewSemaphore(MaxConcurrency),
+		semaphore: conc.NewSemaphore(MaxConcurrency),
 		mysqlDSN:  dsn,
 	}
 	m.initHandler()

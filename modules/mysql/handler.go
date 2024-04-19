@@ -1,7 +1,7 @@
 package mysql
 
 import (
-	"github.com/tnnmigga/nett/core"
+	"github.com/tnnmigga/nett/conc"
 	"github.com/tnnmigga/nett/msgbus"
 )
 
@@ -13,7 +13,7 @@ func (m *module) initHandler() {
 }
 
 func (m *module) onExecSQL(req *ExecSQL, resolve func(any), reject func(error)) {
-	core.GoWithGroup(req.GroupKey, func() {
+	conc.GoWithGroup(req.GroupKey, func() {
 		m.semaphore.P()
 		defer m.semaphore.V()
 		err := m.gormDB.Exec(req.SQL, req.Args...).Error
@@ -26,7 +26,7 @@ func (m *module) onExecSQL(req *ExecSQL, resolve func(any), reject func(error)) 
 }
 
 func (m *module) onRawSQL(req *RawSQL, resolve func(any), reject func(error)) {
-	core.GoWithGroup(req.GroupKey, func() {
+	conc.GoWithGroup(req.GroupKey, func() {
 		m.semaphore.P()
 		defer m.semaphore.V()
 		var raws []map[string]any
@@ -40,7 +40,7 @@ func (m *module) onRawSQL(req *RawSQL, resolve func(any), reject func(error)) {
 }
 
 func (m *module) onFirst(req *First, resolve func(any), reject func(error)) {
-	core.GoWithGroup(req.GroupKey, func() {
+	conc.GoWithGroup(req.GroupKey, func() {
 		m.semaphore.P()
 		defer m.semaphore.V()
 		var res map[string]any
@@ -54,7 +54,7 @@ func (m *module) onFirst(req *First, resolve func(any), reject func(error)) {
 }
 
 func (m *module) onExecGORM(req *ExecGORM, resolve func(any), reject func(error)) {
-	core.GoWithGroup(req.GroupKey, func() {
+	conc.GoWithGroup(req.GroupKey, func() {
 		m.semaphore.P()
 		defer m.semaphore.V()
 		res, err := req.GORM(m.gormDB)

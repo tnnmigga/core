@@ -1,4 +1,4 @@
-package core
+package conc
 
 import "github.com/tnnmigga/nett/idef"
 

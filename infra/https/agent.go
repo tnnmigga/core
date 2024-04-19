@@ -7,7 +7,7 @@ import (
 	"runtime/debug"
 	"time"
 
-	"github.com/tnnmigga/nett/core"
+	"github.com/tnnmigga/nett/conc"
 	"github.com/tnnmigga/nett/infra/zlog"
 
 	"github.com/gin-gonic/gin"
@@ -42,7 +42,7 @@ func NewHttpAgent() *HttpAgent {
 func (agent *HttpAgent) Run(addr string) error {
 	agent.svr.Addr = addr
 	errChan := make(chan error, 1)
-	core.Go(func() {
+	conc.Go(func() {
 		err := agent.svr.ListenAndServe()
 		if errors.Is(err, http.ErrServerClosed) {
 			return

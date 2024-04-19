@@ -3,7 +3,7 @@ package basic
 import (
 	"reflect"
 
-	"github.com/tnnmigga/nett/core"
+	"github.com/tnnmigga/nett/conc"
 	"github.com/tnnmigga/nett/idef"
 	"github.com/tnnmigga/nett/infra/zlog"
 	"github.com/tnnmigga/nett/msgbus"
@@ -124,7 +124,7 @@ func (c *asyncContext) DeepCopy() interface{} {
 // 执行完将结果返到模块线程往后执行
 // 匿名函数捕获的变量需要防范并发读写问题
 func (m *Module) Async(f func() (any, error), cb func(any, error)) {
-	core.Go(func() {
+	conc.Go(func() {
 		defer utils.RecoverPanic()
 		res, err := f()
 		m.Assign(&asyncContext{

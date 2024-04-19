@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/tnnmigga/nett/core"
+	"github.com/tnnmigga/nett/conc"
 	"github.com/tnnmigga/nett/idef"
 	"github.com/tnnmigga/nett/modules/basic"
 
@@ -17,7 +17,7 @@ const MaxConcurrency = 0xFF
 
 type module struct {
 	*basic.Module
-	semaphore core.Semaphore // 控制并发数
+	semaphore conc.Semaphore // 控制并发数
 	mongoCli  *mongo.Client  // mongo
 	mongoURI  string
 }
@@ -25,7 +25,7 @@ type module struct {
 func New(name idef.ModName, uri string) idef.IModule {
 	m := &module{
 		Module:    basic.New(name, basic.DefaultMQLen),
-		semaphore: core.NewSemaphore(MaxConcurrency),
+		semaphore: conc.NewSemaphore(MaxConcurrency),
 		mongoURI:  uri,
 	}
 	m.registerHandler()

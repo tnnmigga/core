@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	"github.com/tnnmigga/nett/algorithm"
-	"github.com/tnnmigga/nett/core"
+	"github.com/tnnmigga/nett/conc"
 	"github.com/tnnmigga/nett/idef"
 	"github.com/tnnmigga/nett/msgbus"
 	"github.com/tnnmigga/nett/utils"
@@ -88,7 +88,7 @@ func (h *TimerHeap) tryNextTrigger() {
 		return
 	}
 	h.timer = time.NewTimer(time.Duration(top.Time - utils.NowNs()))
-	core.Go(func(ctx context.Context) {
+	conc.Go(func(ctx context.Context) {
 		select {
 		case <-ctx.Done():
 			return

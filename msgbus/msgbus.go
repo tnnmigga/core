@@ -8,7 +8,7 @@ import (
 
 	"github.com/mohae/deepcopy"
 	"github.com/tnnmigga/nett/conf"
-	"github.com/tnnmigga/nett/core"
+	"github.com/tnnmigga/nett/conc"
 	"github.com/tnnmigga/nett/idef"
 	"github.com/tnnmigga/nett/infra/zlog"
 	"github.com/tnnmigga/nett/utils"
@@ -139,7 +139,7 @@ func localCall(m idef.IModule, req any, cb func(resp any, err error)) {
 		zlog.Errorf("recvs not fuound %v", utils.TypeName(req))
 		return
 	}
-	core.Go(func() {
+	conc.Go(func() {
 		callReq := &idef.RPCRequest{
 			Req:  req,
 			Resp: make(chan any, 1),
