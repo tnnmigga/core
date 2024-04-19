@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/tnnmigga/nett/conf"
+	"github.com/tnnmigga/nett/infra/process"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )
@@ -93,9 +94,11 @@ func Panicf(format string, args ...any) {
 }
 
 func Fatal(args ...any) {
-	logger.Fatal(args...)
+	logger.Error(args...)
+	process.Exit()
 }
 
 func Fatalf(format string, args ...any) {
-	logger.Fatalf(format, args...)
+	logger.Errorf(format, args...)
+	process.Exit()
 }

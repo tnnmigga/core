@@ -20,10 +20,6 @@ var (
 	ErrLockTimeout  = errors.New("etcd lock timeout")
 )
 
-var (
-	once sync.Once
-)
-
 const (
 	lockPrefix = "/cluster/locks"
 )
@@ -31,42 +27,48 @@ const (
 type waitLockManager struct {
 	waitQueue map[string][]*globalLock
 	mtx       sync.Mutex
+	watcher   etcd.WatchChan
+	ctx       context.Context
 }
 
 func newWaitLockManager(ctx context.Context, cli *etcd.Client) *waitLockManager {
 	watcher := cli.Watch(ctx, fmt.Sprintf("%s/", lockPrefix), etcd.WithPrefix())
 	manager := &waitLockManager{
 		waitQueue: make(map[string][]*globalLock),
+		watcher:   watcher,
 	}
-	go func() {
-		for {
-			select {
-			case <-ctx.Done():
-				return
-			case resp := <-watcher:
-				for _, ev := range resp.Events {
-					if ev.Type != etcd.EventTypeDelete {
-						continue
-					}
-					lockKey := string(ev.Kv.Key)
-					manager.mtx.Lock()
-					locks := manager.waitQueue[lockKey]
-					if len(locks) == 0 {
-						manager.mtx.Unlock()
-						continue
-					}
-					locks[0].TryLock()
-					if locks[0].Locked() {
-						locks = locks[1:]
-						manager.waitQueue[lockKey] = locks
-					}
-					manager.mtx.Unlock()
-				}
-			}
-		}
-	}()
+	go manager.watch()
 	return &waitLockManager{
 		waitQueue: make(map[string][]*globalLock),
+	}
+}
+
+func (m *waitLockManager) watch() {
+	defer utils.RecoverPanic()
+	for {
+		select {
+		case <-m.ctx.Done():
+			return
+		case resp := <-m.watcher:
+			for _, ev := range resp.Events {
+				if ev.Type != etcd.EventTypeDelete {
+					continue
+				}
+				lockKey := string(ev.Kv.Key)
+				m.mtx.Lock()
+				locks := m.waitQueue[lockKey]
+				if len(locks) == 0 {
+					m.mtx.Unlock()
+					continue
+				}
+				locks[0].TryLock()
+				if locks[0].Locked() {
+					locks = locks[1:]
+					m.waitQueue[lockKey] = locks
+				}
+				m.mtx.Unlock()
+			}
+		}
 	}
 }
 

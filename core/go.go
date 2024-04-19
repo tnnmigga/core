@@ -119,6 +119,7 @@ func WaitGoDone(maxWaitTime time.Duration) {
 	c := make(chan struct{}, 1)
 	timer := time.After(maxWaitTime)
 	go func() {
+		defer utils.RecoverPanic()
 		wg.Wait()
 		c <- struct{}{}
 	}()

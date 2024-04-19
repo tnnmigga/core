@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/tnnmigga/nett/conf"
-	"github.com/tnnmigga/nett/infra/sys"
+	"github.com/tnnmigga/nett/infra/process"
 	"github.com/tnnmigga/nett/infra/zlog"
 	"github.com/tnnmigga/nett/utils"
 
@@ -29,44 +29,9 @@ var clusterNode *Node
 
 type Node struct {
 	etcdClient *etcd.Client
+	waitLocks  *waitLockManager
 	leaseID    etcd.LeaseID
 	cancelCtx  utils.IContextWithCancel
-	waitLocks  waitLockManager
-}
-
-func (n *Node) KeepAlive() {
-	go func() {
-		defer func() {
-			utils.RecoverPanic()
-			if r := recover(); r != nil {
-				zlog.Errorf("%v: %s", r, debug.Stack())
-				sys.Abort()
-			}
-		}()
-		ticker := time.NewTicker(leaseTTL * time.Second / 2)
-		defer ticker.Stop()
-		for {
-			select {
-			case <-n.cancelCtx.Done():
-				return
-			case <-ticker.C:
-				zlog.Debugf("etcd keep alive %d", n.leaseID)
-				ctx, cancel := context.WithTimeout(n.cancelCtx, opTimeout/2)
-				_, err := n.etcdClient.KeepAliveOnce(ctx, n.leaseID)
-				cancel()
-				// 若etcd异常则退出
-				if err != nil && !n.cancelCtx.Canceled() {
-					zlog.Errorf("etcd keep alive error: %v", err)
-					sys.Abort()
-					return
-				}
-			}
-		}
-	}()
-}
-
-func etcdNodeKey() string {
-	return fmt.Sprintf("%s/%d", nodePrefix, conf.ServerID)
 }
 
 func InitNode() error {
@@ -97,9 +62,45 @@ func InitNode() error {
 		cancelCtx:  utils.ContextWithCancel(context.Background()),
 		leaseID:    lease.ID,
 		etcdClient: cli,
+		waitLocks:  newWaitLockManager(ctx, cli),
 	}
 	clusterNode.KeepAlive()
 	return nil
+}
+
+func etcdNodeKey() string {
+	return fmt.Sprintf("%s/%d", nodePrefix, conf.ServerID)
+}
+
+func (n *Node) KeepAlive() {
+	go func() {
+		defer func() {
+			utils.RecoverPanic()
+			if r := recover(); r != nil {
+				zlog.Errorf("%v: %s", r, debug.Stack())
+				process.Exit()
+			}
+		}()
+		ticker := time.NewTicker(leaseTTL * time.Second / 2)
+		defer ticker.Stop()
+		for {
+			select {
+			case <-n.cancelCtx.Done():
+				return
+			case <-ticker.C:
+				zlog.Debugf("etcd keep alive %d", n.leaseID)
+				ctx, cancel := context.WithTimeout(n.cancelCtx, opTimeout/2)
+				_, err := n.etcdClient.KeepAliveOnce(ctx, n.leaseID)
+				cancel()
+				// 若etcd异常则退出
+				if err != nil && !n.cancelCtx.Canceled() {
+					zlog.Errorf("etcd keep alive error: %v", err)
+					process.Exit()
+					return
+				}
+			}
+		}
+	}()
 }
 
 func DeadNode() {

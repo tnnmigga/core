@@ -2,6 +2,7 @@ package nett
 
 import (
 	"fmt"
+	"os"
 	"runtime/debug"
 	"sync"
 	"time"
@@ -10,14 +11,14 @@ import (
 	"github.com/tnnmigga/nett/core"
 	"github.com/tnnmigga/nett/idef"
 	"github.com/tnnmigga/nett/infra/cluster"
-	"github.com/tnnmigga/nett/infra/sys/argv"
+	"github.com/tnnmigga/nett/infra/process"
 	"github.com/tnnmigga/nett/infra/zlog"
 	"github.com/tnnmigga/nett/modules/link"
 	"github.com/tnnmigga/nett/utils"
 )
 
 func init() {
-	fname := argv.Str("configs.jsonc", "-c", "--config")
+	fname := process.Argv.Str("configs.jsonc", "-c")
 	conf.LoadFromJSON(utils.ReadFile(fname))
 	zlog.Init()
 }
@@ -43,23 +44,24 @@ func (s *Server) onInit() {
 	zlog.Warnf("server initialization")
 	err := cluster.InitNode()
 	if err != nil {
-		zlog.Fatalf("cluster.InitNode error %v", err)
+		zlog.Errorf("cluster.InitNode error %v", err)
+		os.Exit(1)
 	}
 	s.after(idef.ServerStateInit, s.abort)
 }
 
 func (s *Server) onRun() {
-	s.before(idef.ServerStateRun, s.abort)
+	s.before(idef.ServerStateRun, s.exit)
 	zlog.Warn("server try to run")
 	for _, m := range s.modules {
 		s.runModule(s.wg, m)
 	}
 	zlog.Warn("server running")
-	s.after(idef.ServerStateRun, s.abort)
+	s.after(idef.ServerStateRun, s.exit)
 }
 
 func (s *Server) onStop() {
-	s.before(idef.ServerStateStop, s.noabort)
+	s.before(idef.ServerStateStop, s.record)
 	zlog.Warn("server try to stop")
 	s.waitMsgHandling(time.Minute)
 	core.WaitGoDone(time.Minute)
@@ -69,12 +71,12 @@ func (s *Server) onStop() {
 	}
 	s.wg.Wait()
 	zlog.Warn("server stoped")
-	s.after(idef.ServerStateStop, s.noabort)
+	s.after(idef.ServerStateStop, s.record)
 }
 
 func (s *Server) onExit() {
 	defer cluster.DeadNode()
-	s.before(idef.ServerStateExit, s.noabort)
+	s.before(idef.ServerStateExit, s.record)
 	zlog.Warn("server exit")
 }
 
@@ -111,11 +113,19 @@ func (s *Server) waitMsgHandling(maxWaitTime time.Duration) {
 	zlog.Errorf("wait msg handing timeout")
 }
 
+// 不走退出流程直接退出进程
 func (s *Server) abort(m idef.IModule, err error) {
+	zlog.Errorf("module %s, on %s, error: %v", m.Name(), utils.Caller(3), err)
+	os.Exit(1)
+}
+
+// 正常走退出流程退出
+func (s *Server) exit(m idef.IModule, err error) {
 	zlog.Fatalf("module %s, on %s, error: %v", m.Name(), utils.Caller(3), err)
 }
 
-func (s *Server) noabort(m idef.IModule, err error) {
+// 仅记录错误
+func (s *Server) record(m idef.IModule, err error) {
 	zlog.Errorf("module %s, on %s, error: %v", m.Name(), utils.Caller(3), err)
 }
 
