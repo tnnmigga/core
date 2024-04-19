@@ -7,13 +7,13 @@ import (
 	"sync"
 	"time"
 
-	"github.com/tnnmigga/nett/conf"
 	"github.com/tnnmigga/nett/conc"
+	"github.com/tnnmigga/nett/conf"
 	"github.com/tnnmigga/nett/idef"
 	"github.com/tnnmigga/nett/infra/cluster"
 	"github.com/tnnmigga/nett/infra/process"
 	"github.com/tnnmigga/nett/infra/zlog"
-	"github.com/tnnmigga/nett/modules/link"
+	"github.com/tnnmigga/nett/mods/link"
 	"github.com/tnnmigga/nett/utils"
 )
 

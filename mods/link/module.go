@@ -10,7 +10,7 @@ import (
 	"github.com/tnnmigga/nett/conf"
 	"github.com/tnnmigga/nett/idef"
 	"github.com/tnnmigga/nett/infra/zlog"
-	"github.com/tnnmigga/nett/modules/basic"
+	"github.com/tnnmigga/nett/mods/basic"
 	"github.com/tnnmigga/nett/msgbus"
 	"github.com/tnnmigga/nett/utils"
 

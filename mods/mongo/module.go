@@ -6,7 +6,7 @@ import (
 
 	"github.com/tnnmigga/nett/conc"
 	"github.com/tnnmigga/nett/idef"
-	"github.com/tnnmigga/nett/modules/basic"
+	"github.com/tnnmigga/nett/mods/basic"
 
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"

@@ -3,7 +3,7 @@ package mysql
 import (
 	"github.com/tnnmigga/nett/conc"
 	"github.com/tnnmigga/nett/idef"
-	"github.com/tnnmigga/nett/modules/basic"
+	"github.com/tnnmigga/nett/mods/basic"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 )
