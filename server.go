@@ -8,20 +8,12 @@ import (
 	"time"
 
 	"github.com/tnnmigga/nett/conc"
-	"github.com/tnnmigga/nett/conf"
 	"github.com/tnnmigga/nett/idef"
 	"github.com/tnnmigga/nett/infra/cluster"
-	"github.com/tnnmigga/nett/infra/process"
 	"github.com/tnnmigga/nett/infra/zlog"
 	"github.com/tnnmigga/nett/mods/link"
 	"github.com/tnnmigga/nett/utils"
 )
-
-func init() {
-	fname := process.Argv.Str("configs.jsonc", "-c")
-	conf.LoadFromJSON(utils.ReadFile(fname))
-	zlog.Init()
-}
 
 type Server struct {
 	modules []idef.IModule
@@ -42,7 +34,7 @@ func NewServer(modules ...idef.IModule) *Server {
 
 func (s *Server) onInit() {
 	zlog.Warnf("server initialization")
-	err := cluster.InitNode()
+	err := cluster.Init()
 	if err != nil {
 		zlog.Errorf("cluster.InitNode error %v", err)
 		os.Exit(1)
@@ -75,7 +67,7 @@ func (s *Server) onStop() {
 }
 
 func (s *Server) onExit() {
-	defer cluster.DeadNode()
+	defer cluster.Dead()
 	s.before(idef.ServerStateExit, s.record)
 	zlog.Warn("server exit")
 }

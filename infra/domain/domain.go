@@ -1,19 +1,28 @@
 package domain
 
-type Pool struct {
+import "github.com/tnnmigga/nett/idef"
+
+type Root interface {
+	PutCase(index int, useCase any)
+	GetCase(index int) any
+}
+
+type root struct {
+	idef.IModule
 	useCases []any
 }
 
-func NewPool(maxCaseIndex int) *Pool {
-	return &Pool{
+func New(m idef.IModule, maxCaseIndex int) Root {
+	return &root{
+		IModule:  m,
 		useCases: make([]any, maxCaseIndex),
 	}
 }
 
-func (p *Pool) PutCase(caseIndex int, useCase any) {
+func (p *root) PutCase(caseIndex int, useCase any) {
 	p.useCases[caseIndex] = useCase
 }
 
-func (p *Pool) GetCase(caseIndex int) any {
+func (p *root) GetCase(caseIndex int) any {
 	return p.useCases[caseIndex]
 }

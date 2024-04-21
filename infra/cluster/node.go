@@ -12,12 +12,18 @@ import (
 	"github.com/tnnmigga/nett/infra/zlog"
 	"github.com/tnnmigga/nett/utils"
 
-	etcd "go.etcd.io/etcd/client/v3"
+	clientv3 "go.etcd.io/etcd/client/v3"
 )
 
 var (
 	ErrNodeIsExists = errors.New("node already exists")
 )
+
+var etcd *clientv3.Client
+
+func init() {
+
+}
 
 const (
 	leaseTTL   = 10
@@ -28,41 +34,40 @@ const (
 var clusterNode *Node
 
 type Node struct {
-	etcdClient *etcd.Client
-	waitLocks  *waitLockManager
-	leaseID    etcd.LeaseID
-	cancelCtx  utils.IContextWithCancel
+	waitLocks *waitLockManager
+	leaseID   clientv3.LeaseID
+	cancelCtx utils.IContextWithCancel
 }
 
-func InitNode() error {
-	cli, err := etcd.New(etcd.Config{
+func Init() error {
+	cli, err := clientv3.New(clientv3.Config{
 		Endpoints:   conf.Array("etcd.endpoints", []string{"http://localhost:2379"}),
 		DialTimeout: opTimeout,
 	})
 	if err != nil {
-		return err
+		panic(err)
 	}
+	etcd = cli
 	ctx, cancel := context.WithTimeout(context.Background(), opTimeout)
 	defer cancel()
-	lease, err := cli.Grant(ctx, leaseTTL)
+	lease, err := etcd.Grant(ctx, leaseTTL)
 	if err != nil {
 		return err
 	}
-	putTxn := cli.Txn(ctx)
-	putTxn.If(etcd.Compare(etcd.Version(etcdNodeKey()), "=", 0)).
-		Then(etcd.OpPut(etcdNodeKey(), "", etcd.WithLease(lease.ID)))
+	putTxn := etcd.Txn(ctx)
+	putTxn.If(clientv3.Compare(clientv3.Version(etcdNodeKey()), "=", 0)).
+		Then(clientv3.OpPut(etcdNodeKey(), "", clientv3.WithLease(lease.ID)))
 	putRes, err := putTxn.Commit()
 	if err != nil {
-		return nil
+		return err
 	}
 	if !putRes.Succeeded {
 		return ErrNodeIsExists
 	}
 	clusterNode = &Node{
-		cancelCtx:  utils.ContextWithCancel(context.Background()),
-		leaseID:    lease.ID,
-		etcdClient: cli,
-		waitLocks:  newWaitLockManager(ctx, cli),
+		cancelCtx: utils.ContextWithCancel(context.Background()),
+		leaseID:   lease.ID,
+		waitLocks: newWaitLockManager(ctx),
 	}
 	clusterNode.KeepAlive()
 	return nil
@@ -90,7 +95,7 @@ func (n *Node) KeepAlive() {
 			case <-ticker.C:
 				zlog.Debugf("etcd keep alive %d", n.leaseID)
 				ctx, cancel := context.WithTimeout(n.cancelCtx, opTimeout/2)
-				_, err := n.etcdClient.KeepAliveOnce(ctx, n.leaseID)
+				_, err := etcd.KeepAliveOnce(ctx, n.leaseID)
 				cancel()
 				// 若etcd异常则退出
 				if err != nil && !n.cancelCtx.Canceled() {
@@ -103,13 +108,13 @@ func (n *Node) KeepAlive() {
 	}()
 }
 
-func DeadNode() {
+func Dead() {
 	clusterNode.cancelCtx.Cancel()
 	ctx, cancel := context.WithTimeout(context.Background(), opTimeout)
 	defer cancel()
-	_, err := clusterNode.etcdClient.Delete(ctx, etcdNodeKey())
+	_, err := etcd.Delete(ctx, etcdNodeKey())
 	if err != nil {
 		zlog.Errorf("etcd delete node error: %v", err)
 	}
-	clusterNode.etcdClient.Close()
+	etcd.Close()
 }

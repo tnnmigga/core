@@ -3,20 +3,41 @@ package conf
 import (
 	"encoding/json"
 	"errors"
-	"log"
+	"fmt"
+	"io"
+	"os"
 	"regexp"
 	"strings"
 
-	"gopkg.in/yaml.v3"
+	"github.com/tnnmigga/nett/infra/process"
 )
 
 func init() {
+	RegInitFn(ckeckServer)
+	fname := process.Argv.Str("-c", "configs.jsonc")
+	b := loadLocalFile(fname)
+	LoadFromJSON(b)
+	err := afterLoad()
+	if err != nil {
+		panic(err)
+	}
+}
 
+func loadLocalFile(fname string) []byte {
+	file, err := os.OpenFile(fname, os.O_RDONLY, 0)
+	if err != nil {
+		panic(err)
+	}
+	b, err := io.ReadAll(file)
+	if err != nil {
+		panic(err)
+	}
+	return b
 }
 
 var (
 	confs map[string]any = map[string]any{}
-	fns   []func()
+	fns   []func() error
 )
 
 var errConfigNotFound error = errors.New("configs not found")
@@ -25,20 +46,8 @@ func LoadFromJSON(b []byte) {
 	b = uncomment(b)
 	err := json.Unmarshal(b, &confs)
 	if err != nil {
-		log.Fatalf("LoadFromJSON unmarshal error %v", err)
+		panic(fmt.Errorf("LoadFromJSON unmarshal error %v", err))
 	}
-	// transform(tmp, confs, nil)
-	afterLoad()
-}
-
-func LoadFromYAML(b []byte) {
-	tmp := map[string]any{}
-	err := yaml.Unmarshal(b, &tmp)
-	if err != nil {
-		log.Fatalf("LoadFromYAML unmarshal error %v", err)
-	}
-	// transform(tmp, confs, nil)
-	afterLoad()
 }
 
 func uncomment(b []byte) []byte {
@@ -48,7 +57,7 @@ func uncomment(b []byte) []byte {
 	return reg.ReplaceAll(b, []byte("\n"))
 }
 
-func RegInitFn(fn func()) {
+func RegInitFn(fn func() error) {
 	fns = append(fns, fn)
 }
 
@@ -63,11 +72,13 @@ func RegInitFn(fn func()) {
 // 	}
 // }
 
-func afterLoad() {
-	initServerConf()
+func afterLoad() error {
 	for _, fn := range fns {
-		fn()
+		if err := fn(); err != nil {
+			return err
+		}
 	}
+	return nil
 }
 
 type vType interface {

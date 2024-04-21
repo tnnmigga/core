@@ -11,8 +11,8 @@ type argvParser struct {
 }
 
 // 查找命令行参数中的指定参数并解析成整型
-func (a argvParser) Int(default_ int, name string) int {
-	value := a.Str("", name)
+func (a argvParser) Int(name string, default_ int) int {
+	value := a.Str(name, "")
 	if value == "" {
 		return default_
 	}
@@ -24,7 +24,7 @@ func (a argvParser) Int(default_ int, name string) int {
 }
 
 // 查找命令行参数中的指定参数
-func (a argvParser) Str(default_ string, name string) string {
+func (a argvParser) Str(name string, default_ string) string {
 	for i, v := range os.Args[1:] {
 		if v == name {
 			return os.Args[i+2]

@@ -15,7 +15,6 @@ var logger *zap.SugaredLogger
 
 func init() {
 	// 先按默认值临时创建一个logger
-	// 用于配置初始化前的日志输出
 	Init()
 }
 

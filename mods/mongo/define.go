@@ -13,17 +13,24 @@ type MongoSaveOp struct {
 // GroupKey为保证并发时的时序
 type MongoSave struct {
 	GroupKey string
-	DBName   string
 	CollName string
 	Ops      []*MongoSaveOp
 }
 
 // 从MongoDB加载数据
 // GroupKey为保证并发时的时序
-type MongoLoad struct {
+// 返回[]bson.Raw
+type MongoLoadMulti struct {
 	GroupKey string
-	DBName   string
 	CollName string
 	Filter   bson.M
-	Data     any
+}
+
+// 从MongoDB加载数据
+// GroupKey为保证并发时的时序
+// 返回bson.Raw
+type MongoLoadSingle struct {
+	GroupKey string
+	CollName string
+	Filter   bson.M
 }

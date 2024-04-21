@@ -11,7 +11,11 @@ func Async[T any](m idef.IModule, f func() (T, error), cb func(T, error)) {
 		res, err := f()
 		return res, err
 	}, func(a any, err error) {
-		cb(a.(T), err)
+		if a != nil {
+			cb(a.(T), err)
+		} else {
+			var tmp T // 避免写ruturn nil导致的断言失败
+			cb(tmp, err)
+		}
 	})
 }
-

@@ -19,14 +19,17 @@ type module struct {
 	*basic.Module
 	semaphore conc.Semaphore // 控制并发数
 	mongoCli  *mongo.Client  // mongo
+	database  *mongo.Database
 	mongoURI  string
+	dbName    string
 }
 
-func New(name idef.ModName, uri string) idef.IModule {
+func New(name idef.ModName, uri string, dbName string) idef.IModule {
 	m := &module{
 		Module:    basic.New(name, basic.DefaultMQLen),
 		semaphore: conc.NewSemaphore(MaxConcurrency),
 		mongoURI:  uri,
+		dbName:    dbName,
 	}
 	m.registerHandler()
 	m.Before(idef.ServerStateRun, m.beforeRun)
@@ -44,6 +47,7 @@ func (m *module) beforeRun() (err error) {
 	if err := m.mongoCli.Ping(ctx, readpref.Primary()); err != nil {
 		return err
 	}
+	m.database = m.mongoCli.Database(m.dbName)
 	return nil
 }
 

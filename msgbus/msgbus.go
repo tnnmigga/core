@@ -7,8 +7,8 @@ import (
 	"time"
 
 	"github.com/mohae/deepcopy"
-	"github.com/tnnmigga/nett/conf"
 	"github.com/tnnmigga/nett/conc"
+	"github.com/tnnmigga/nett/conf"
 	"github.com/tnnmigga/nett/idef"
 	"github.com/tnnmigga/nett/infra/zlog"
 	"github.com/tnnmigga/nett/utils"
@@ -19,12 +19,6 @@ import (
 var (
 	ErrRPCTimeout = errors.New("rpc timeout")
 )
-
-func init() {
-	conf.RegInitFn(func() {
-		// rpcMaxWaitTime = time.Duration(conf.Int64("rpc-wait-time", 10)) * time.Second
-	})
-}
 
 var (
 	recvers map[reflect.Type][]IRecver

@@ -11,13 +11,13 @@ import (
 	"github.com/tnnmigga/nett/idef"
 	"github.com/tnnmigga/nett/infra/zlog"
 	"github.com/tnnmigga/nett/utils"
-	etcd "go.etcd.io/etcd/client/v3"
+	clientv3 "go.etcd.io/etcd/client/v3"
 )
 
 var (
-	ErrLockIsLocked = errors.New("etcd lock locked")
-	ErrLockFaild    = errors.New("etcd lock faild")
-	ErrLockTimeout  = errors.New("etcd lock timeout")
+	ErrLockIsLocked  = errors.New("etcd lock locked")
+	ErrLockEtcdError = errors.New("etcd lock etcd error")
+	ErrLockTimeout   = errors.New("etcd lock timeout")
 )
 
 const (
@@ -25,22 +25,22 @@ const (
 )
 
 type waitLockManager struct {
-	waitQueue map[string][]*globalLock
+	waitQueue map[string][]*Lock
 	mtx       sync.Mutex
-	watcher   etcd.WatchChan
+	watcher   clientv3.WatchChan
 	ctx       context.Context
 }
 
-func newWaitLockManager(ctx context.Context, cli *etcd.Client) *waitLockManager {
-	watcher := cli.Watch(ctx, fmt.Sprintf("%s/", lockPrefix), etcd.WithPrefix())
+func newWaitLockManager(ctx context.Context) *waitLockManager {
+	watcher := etcd.Watch(ctx, fmt.Sprintf("%s/", lockPrefix), clientv3.WithPrefix())
 	manager := &waitLockManager{
-		waitQueue: make(map[string][]*globalLock),
+		waitQueue: make(map[string][]*Lock),
 		watcher:   watcher,
 		ctx:       ctx,
 	}
 	go manager.watch()
 	return &waitLockManager{
-		waitQueue: make(map[string][]*globalLock),
+		waitQueue: make(map[string][]*Lock),
 	}
 }
 
@@ -52,7 +52,7 @@ func (m *waitLockManager) watch() {
 			return
 		case resp := <-m.watcher:
 			for _, ev := range resp.Events {
-				if ev.Type != etcd.EventTypeDelete {
+				if ev.Type != clientv3.EventTypeDelete {
 					continue
 				}
 				lockKey := string(ev.Kv.Key)
@@ -73,7 +73,7 @@ func (m *waitLockManager) watch() {
 	}
 }
 
-func (m *waitLockManager) subscribe(gl *globalLock) {
+func (m *waitLockManager) subscribe(gl *Lock) {
 	m.mtx.Lock()
 	defer m.mtx.Unlock()
 	locks := m.waitQueue[gl.lockKey]
@@ -91,59 +91,54 @@ func etcdLockKey(name string) string {
 	return fmt.Sprintf("%s/%s", lockPrefix, name)
 }
 
-type globalLock struct {
-	locked    atomic.Bool
-	lockKey   string
-	cancelCtx utils.IContextWithCancel
-	awake     chan struct{}
+type Lock struct {
+	lease   *Lease
+	locked  atomic.Bool
+	lockKey string
+	awake   chan struct{}
 }
 
-func NewLock(name string) *globalLock {
-	return &globalLock{
-		lockKey:   etcdLockKey(name),
-		cancelCtx: utils.ContextWithCancel(context.Background()),
+func NewLock(name string) *Lock {
+	return &Lock{
+		lockKey: etcdLockKey(name),
 	}
 }
 
-func (l *globalLock) TryLock() bool {
+func (l *Lock) TryLock() error {
 	if l.locked.Load() {
-		panic(ErrLockIsLocked)
+		return ErrLockIsLocked
 	}
-	cli := clusterNode.etcdClient
 	ctx, cancel := context.WithTimeout(context.Background(), opTimeout)
 	defer cancel()
-	lease, err := clusterNode.etcdClient.Grant(ctx, leaseTTL)
-	if err != nil {
-		zlog.Errorf("etcd grant error: %v", err)
-		return false
+	if l.lease == nil {
+		lease, err := NewLease()
+		if err != nil {
+			zlog.Errorf("etcd error %v", err)
+			return ErrLockEtcdError
+		}
+		l.lease = lease
 	}
-	txn := cli.Txn(ctx).If(etcd.Compare(etcd.Version(l.lockKey), "=", 0)).
-		Then(etcd.OpPut(l.lockKey, "", etcd.WithLease(lease.ID)))
+	txn := etcd.Txn(ctx).If(clientv3.Compare(clientv3.Version(l.lockKey), "=", 0)).
+		Then(clientv3.OpPut(l.lockKey, "", clientv3.WithLease(l.lease.leaseID)))
 	resp, err := txn.Commit()
 	if err != nil {
-		return false
+		l.lease.Revoke()
+		zlog.Errorf("etcd txn commit error %v", err)
+		return ErrLockEtcdError
 	}
 	if !resp.Succeeded {
-		_, err := cli.Revoke(ctx, lease.ID)
-		if err != nil {
-			zlog.Errorf("etcd revoke error: %v", err)
-		}
-		return false
-	}
-	_, err = cli.KeepAlive(l.cancelCtx, lease.ID)
-	if err != nil {
-		zlog.Errorf("etcd keepalive error: %v", err)
-		return false
+		l.lease.Revoke()
+		return ErrLockIsLocked
 	}
 	l.locked.Store(true)
 	if l.awake != nil {
 		close(l.awake)
 	}
-	return true
+	return nil
 }
 
-func (l *globalLock) Wait(timeout time.Duration) error {
-	if l.TryLock() {
+func (l *Lock) Wait(timeout time.Duration) error {
+	if l.TryLock() == nil {
 		return nil
 	}
 	l.awake = make(chan struct{})
@@ -157,11 +152,11 @@ func (l *globalLock) Wait(timeout time.Duration) error {
 	}
 }
 
-func (l *globalLock) Locked() bool {
+func (l *Lock) Locked() bool {
 	return l.locked.Load()
 }
 
-func (l *globalLock) While(retries int, interval ...time.Duration) error {
+func (l *Lock) While(retries int, interval ...time.Duration) error {
 	if l.locked.Load() {
 		panic(ErrLockIsLocked)
 	}
@@ -169,7 +164,7 @@ func (l *globalLock) While(retries int, interval ...time.Duration) error {
 		interval = []time.Duration{128 * time.Millisecond}
 	}
 	for i := 0; i < retries; i++ {
-		if l.TryLock() {
+		if l.TryLock() == nil {
 			return nil
 		}
 		time.Sleep(interval[0])
@@ -189,7 +184,7 @@ func LockAndDo[T any](m idef.IModule, name string, f func(error, ...T), timeout 
 			f:     f,
 			cbctx: cbctx,
 		}
-		if l.TryLock() {
+		if l.TryLock() == nil {
 			return cb, nil
 		}
 		err := l.Wait(timeout)
@@ -200,11 +195,13 @@ func LockAndDo[T any](m idef.IModule, name string, f func(error, ...T), timeout 
 	})
 }
 
-func (l *globalLock) Release() {
+func (l *Lock) Release() {
 	if !l.locked.Load() {
 		zlog.Errorf("lock is not locked %s", l.lockKey)
 		return
 	}
-	l.cancelCtx.Cancel()
-	clusterNode.etcdClient.Delete(context.Background(), l.lockKey)
+	if l.lease != nil {
+		l.lease.Revoke()
+	}
+	etcd.Delete(context.Background(), l.lockKey)
 }
