@@ -2,6 +2,11 @@ package mongo
 
 import (
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo"
+)
+
+var (
+	ErrNoDocuments = mongo.ErrNoDocuments
 )
 
 type MongoSaveOp struct {

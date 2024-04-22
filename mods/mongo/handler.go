@@ -57,12 +57,12 @@ func (m *module) onMongoLoadMulti(req *MongoLoadMulti, resolve func(any), reject
 		m.semaphore.P()
 		defer m.semaphore.V()
 		ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
+		defer cancel()
 		cur, _ := m.database.Collection(req.CollName).Find(ctx, req.Filter)
 		raws := []bson.Raw{}
 		for cur.Next(ctx) {
 			raws = append(raws, cur.Current)
 		}
-		cancel()
 		err := cur.Err()
 		if err != nil {
 			reject(err)

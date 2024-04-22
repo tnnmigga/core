@@ -93,7 +93,7 @@ func (n *Node) KeepAlive() {
 			case <-n.cancelCtx.Done():
 				return
 			case <-ticker.C:
-				zlog.Debugf("etcd keep alive %d", n.leaseID)
+				// zlog.Debugf("etcd keep alive %d", n.leaseID)
 				ctx, cancel := context.WithTimeout(n.cancelCtx, opTimeout/2)
 				_, err := etcd.KeepAliveOnce(ctx, n.leaseID)
 				cancel()
