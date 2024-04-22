@@ -2,7 +2,6 @@ package mongo
 
 import (
 	"context"
-	"time"
 
 	"github.com/tnnmigga/nett/conc"
 	"github.com/tnnmigga/nett/infra/zlog"
@@ -10,15 +9,30 @@ import (
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 func (m *module) registerHandler() {
-	msgbus.RegisterHandler(m, m.onMongoSave)
+	msgbus.RegisterHandler(m, m.onMongoSaveSingle)
+	msgbus.RegisterHandler(m, m.onMongoSaveMulti)
 	msgbus.RegisterRPC(m, m.onMongoLoadMulti)
 	msgbus.RegisterRPC(m, m.onMongoLoadSingle)
 }
 
-func (m *module) onMongoSave(req *MongoSave) {
+func (m *module) onMongoSaveSingle(req *MongoSaveSingle) {
+	conc.GoWithGroup(req.GroupKey, func() {
+		m.semaphore.P()
+		defer m.semaphore.V()
+		ctx, cancel := context.WithTimeout(context.Background(), mongoOpTimeout)
+		defer cancel()
+		_, err := m.database.Collection(req.CollName).ReplaceOne(ctx, req.Op.Filter, req.Op.Value, options.Replace().SetUpsert(true))
+		if err != nil {
+			zlog.Errorf("mongo save single error %v", err)
+		}
+	})
+}
+
+func (m *module) onMongoSaveMulti(req *MongoSaveMulti) {
 	ms := make([]mongo.WriteModel, 0, len(req.Ops))
 	for _, op := range req.Ops {
 		m := mongo.NewReplaceOneModel().SetFilter(op.Filter).SetReplacement(op.Value).SetUpsert(true)
@@ -27,11 +41,11 @@ func (m *module) onMongoSave(req *MongoSave) {
 	conc.GoWithGroup(req.GroupKey, func() {
 		m.semaphore.P()
 		defer m.semaphore.V()
-		ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
+		ctx, cancel := context.WithTimeout(context.Background(), mongoOpTimeout)
+		defer cancel()
 		_, err := m.database.Collection(req.CollName).BulkWrite(ctx, ms)
-		cancel()
 		if err != nil {
-			zlog.Errorf("mongo save error %v", err)
+			zlog.Errorf("mongo save multi error %v", err)
 		}
 	})
 }
@@ -40,9 +54,9 @@ func (m *module) onMongoLoadSingle(req *MongoLoadSingle, resolve func(any), reje
 	conc.GoWithGroup(req.GroupKey, func() {
 		m.semaphore.P()
 		defer m.semaphore.V()
-		ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
+		ctx, cancel := context.WithTimeout(context.Background(), mongoOpTimeout)
+		defer cancel()
 		res := m.database.Collection(req.CollName).FindOne(ctx, req.Filter)
-		cancel()
 		raw, err := res.Raw()
 		if res.Err() != nil {
 			reject(err)
@@ -56,7 +70,7 @@ func (m *module) onMongoLoadMulti(req *MongoLoadMulti, resolve func(any), reject
 	conc.GoWithGroup(req.GroupKey, func() {
 		m.semaphore.P()
 		defer m.semaphore.V()
-		ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
+		ctx, cancel := context.WithTimeout(context.Background(), mongoOpTimeout)
 		defer cancel()
 		cur, _ := m.database.Collection(req.CollName).Find(ctx, req.Filter)
 		raws := []bson.Raw{}

@@ -1,12 +1,18 @@
 package mongo
 
 import (
+	"time"
+
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
 var (
 	ErrNoDocuments = mongo.ErrNoDocuments
+)
+
+const (
+	mongoOpTimeout = 10 * time.Second
 )
 
 type MongoSaveOp struct {
@@ -16,7 +22,15 @@ type MongoSaveOp struct {
 
 // 保存至MongoDB
 // GroupKey为保证并发时的时序
-type MongoSave struct {
+type MongoSaveSingle struct {
+	GroupKey string
+	CollName string
+	Op       *MongoSaveOp
+}
+
+// 保存至MongoDB
+// GroupKey为保证并发时的时序
+type MongoSaveMulti struct {
 	GroupKey string
 	CollName string
 	Ops      []*MongoSaveOp
