@@ -22,9 +22,9 @@ func findCastOpt[T any](opts []castOpt, key string, defaultVal T) (value T) {
 	return defaultVal
 }
 
-func NonuseStream() castOpt {
+func UseStream() castOpt {
 	return castOpt{
-		key:   idef.ConstKeyNonuseStream,
+		key:   idef.ConstKeyUseStream,
 		value: true,
 	}
 }

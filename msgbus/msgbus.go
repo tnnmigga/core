@@ -45,20 +45,20 @@ func Cast(msg any, opts ...castOpt) {
 		castLocal(msg, opts...)
 		return
 	}
-	// 检查是否不使用stream
-	if nonuse := findCastOpt[bool](opts, idef.ConstKeyNonuseStream, false); nonuse {
-		// 不使用stream
-		castLocal(&idef.CastPackage{
+	// 检查是否使用stream
+	if use := findCastOpt(opts, idef.ConstKeyUseStream, false); use {
+		// 使用stream
+		castLocal(&idef.StreamCastPackage{
 			ServerID: serverID,
 			Body:     msg,
+			Header:   castHeader(opts),
 		}, opts...)
-		return
+
 	}
-	// 默认使用stream
-	castLocal(&idef.StreamCastPackage{
+	// 默认不使用stream
+	castLocal(&idef.CastPackage{
 		ServerID: serverID,
 		Body:     msg,
-		Header:   castHeader(opts),
 	}, opts...)
 }
 

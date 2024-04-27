@@ -10,12 +10,12 @@ const (
 )
 
 const (
-	ConstKeyNone         = "none"
-	ConstKeyNonuseStream = "nonuse-stream"
-	ConstKeyOneOfMods    = "one-of-mods"
-	ConstKeyServerID     = "server-id"
-	ConstKeyServerType   = "server-type"
-	ConstKeyExpires      = "expires"
+	ConstKeyNone       = "none"
+	ConstKeyUseStream  = "use-stream"
+	ConstKeyOneOfMods  = "one-of-mods"
+	ConstKeyServerID   = "server-id"
+	ConstKeyServerType = "server-type"
+	ConstKeyExpires    = "expires"
 )
 
 type ModName string
