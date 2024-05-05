@@ -53,7 +53,7 @@ func Cast(msg any, opts ...castOpt) {
 			Body:     msg,
 			Header:   castHeader(opts),
 		}, opts...)
-
+		return
 	}
 	// 默认不使用stream
 	castLocal(&idef.CastPackage{
