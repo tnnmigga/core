@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/tnnmigga/nett/idef"
-	"github.com/tnnmigga/nett/infra/zlog"
-	"github.com/tnnmigga/nett/msgbus"
-	"github.com/tnnmigga/nett/utils"
+	"github.com/tnnmigga/core/idef"
+	"github.com/tnnmigga/core/infra/zlog"
+	"github.com/tnnmigga/core/msgbus"
+	"github.com/tnnmigga/core/utils"
 )
 
 type ISubscriber interface {

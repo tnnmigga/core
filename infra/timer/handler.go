@@ -1,8 +1,8 @@
 package timer
 
 import (
-	"github.com/tnnmigga/nett/msgbus"
-	"github.com/tnnmigga/nett/utils"
+	"github.com/tnnmigga/core/msgbus"
+	"github.com/tnnmigga/core/utils"
 )
 
 func (h *TimerHeap) onTimerTrigger(msg *timerTrigger) {

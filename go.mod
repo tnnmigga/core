@@ -1,4 +1,4 @@
-module github.com/tnnmigga/nett
+module github.com/tnnmigga/core
 
 go 1.21.4
 
@@ -12,7 +12,6 @@ require (
 	go.mongodb.org/mongo-driver v1.14.0
 	go.uber.org/zap v1.27.0
 	golang.org/x/exp v0.0.0-20240325151524-a685a6edb6d8
-	gopkg.in/yaml.v3 v3.0.1
 	gorm.io/gorm v1.25.7
 )
 
@@ -29,6 +28,7 @@ require (
 	google.golang.org/genproto/googleapis/api v0.0.0-20230822172742-b8732ec3820d // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20230822172742-b8732ec3820d // indirect
 	google.golang.org/grpc v1.59.0 // indirect
+	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
 require (

@@ -1,8 +1,8 @@
 package mysql
 
 import (
-	"github.com/tnnmigga/nett/conc"
-	"github.com/tnnmigga/nett/msgbus"
+	"github.com/tnnmigga/core/conc"
+	"github.com/tnnmigga/core/msgbus"
 )
 
 func (m *module) initHandler() {

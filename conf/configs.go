@@ -9,7 +9,7 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/tnnmigga/nett/infra/process"
+	"github.com/tnnmigga/core/infra/process"
 )
 
 func init() {

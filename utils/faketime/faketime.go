@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/procodr/monkey"
-	"github.com/tnnmigga/nett/infra/zlog"
+	"github.com/tnnmigga/core/infra/zlog"
 )
 
 var addTime = &atomic.Int64{}

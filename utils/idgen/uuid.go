@@ -4,7 +4,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/tnnmigga/nett/conf"
+	"github.com/tnnmigga/core/conf"
 )
 
 var uuidgen UUIDGenerater

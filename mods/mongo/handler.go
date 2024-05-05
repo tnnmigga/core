@@ -3,9 +3,9 @@ package mongo
 import (
 	"context"
 
-	"github.com/tnnmigga/nett/conc"
-	"github.com/tnnmigga/nett/infra/zlog"
-	"github.com/tnnmigga/nett/msgbus"
+	"github.com/tnnmigga/core/conc"
+	"github.com/tnnmigga/core/infra/zlog"
+	"github.com/tnnmigga/core/msgbus"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"

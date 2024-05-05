@@ -1,6 +1,6 @@
 package domain
 
-import "github.com/tnnmigga/nett/idef"
+import "github.com/tnnmigga/core/idef"
 
 type Root interface {
 	PutCase(index int, useCase any)

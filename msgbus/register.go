@@ -3,9 +3,9 @@ package msgbus
 import (
 	"reflect"
 
-	"github.com/tnnmigga/nett/codec"
-	"github.com/tnnmigga/nett/idef"
-	"github.com/tnnmigga/nett/infra/zlog"
+	"github.com/tnnmigga/core/codec"
+	"github.com/tnnmigga/core/idef"
+	"github.com/tnnmigga/core/infra/zlog"
 )
 
 func RegisterHandler[T any](m idef.IModule, fn func(T)) {

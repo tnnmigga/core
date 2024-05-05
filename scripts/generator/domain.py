@@ -27,7 +27,7 @@ def genUseCase():
         "%s/%s/domain"
         "%s/%s/domain/api"
 
-        "github.com/tnnmigga/nett/idef"
+        "github.com/tnnmigga/core/idef"
     )
 
     type useCase struct {

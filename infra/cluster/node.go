@@ -7,10 +7,10 @@ import (
 	"runtime/debug"
 	"time"
 
-	"github.com/tnnmigga/nett/conf"
-	"github.com/tnnmigga/nett/infra/process"
-	"github.com/tnnmigga/nett/infra/zlog"
-	"github.com/tnnmigga/nett/utils"
+	"github.com/tnnmigga/core/conf"
+	"github.com/tnnmigga/core/infra/process"
+	"github.com/tnnmigga/core/infra/zlog"
+	"github.com/tnnmigga/core/utils"
 
 	clientv3 "go.etcd.io/etcd/client/v3"
 )

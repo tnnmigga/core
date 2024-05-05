@@ -4,12 +4,12 @@ import (
 	"errors"
 	fmt "fmt"
 
-	"github.com/tnnmigga/nett/codec"
-	"github.com/tnnmigga/nett/conf"
-	"github.com/tnnmigga/nett/conc"
-	"github.com/tnnmigga/nett/idef"
-	"github.com/tnnmigga/nett/infra/zlog"
-	"github.com/tnnmigga/nett/msgbus"
+	"github.com/tnnmigga/core/codec"
+	"github.com/tnnmigga/core/conc"
+	"github.com/tnnmigga/core/conf"
+	"github.com/tnnmigga/core/idef"
+	"github.com/tnnmigga/core/infra/zlog"
+	"github.com/tnnmigga/core/msgbus"
 
 	"github.com/nats-io/nats.go"
 )

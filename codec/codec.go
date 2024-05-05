@@ -7,8 +7,8 @@ import (
 	"log"
 	"reflect"
 
-	"github.com/tnnmigga/nett/infra/zlog"
-	"github.com/tnnmigga/nett/utils"
+	"github.com/tnnmigga/core/infra/zlog"
+	"github.com/tnnmigga/core/utils"
 
 	"github.com/gogo/protobuf/proto"
 	"go.mongodb.org/mongo-driver/bson"

@@ -1,6 +1,6 @@
 package conc
 
-import "github.com/tnnmigga/nett/idef"
+import "github.com/tnnmigga/core/idef"
 
 // 异步回调的方式执行函数
 // 启动一个新的goruntine执行同步阻塞的代码

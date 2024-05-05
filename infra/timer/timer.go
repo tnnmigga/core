@@ -4,12 +4,12 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/tnnmigga/nett/algorithm"
-	"github.com/tnnmigga/nett/conc"
-	"github.com/tnnmigga/nett/idef"
-	"github.com/tnnmigga/nett/msgbus"
-	"github.com/tnnmigga/nett/utils"
-	"github.com/tnnmigga/nett/utils/idgen"
+	"github.com/tnnmigga/core/algorithm"
+	"github.com/tnnmigga/core/conc"
+	"github.com/tnnmigga/core/idef"
+	"github.com/tnnmigga/core/msgbus"
+	"github.com/tnnmigga/core/utils"
+	"github.com/tnnmigga/core/utils/idgen"
 
 	"time"
 )

@@ -7,11 +7,11 @@ import (
 	"time"
 
 	"github.com/mohae/deepcopy"
-	"github.com/tnnmigga/nett/conc"
-	"github.com/tnnmigga/nett/conf"
-	"github.com/tnnmigga/nett/idef"
-	"github.com/tnnmigga/nett/infra/zlog"
-	"github.com/tnnmigga/nett/utils"
+	"github.com/tnnmigga/core/conc"
+	"github.com/tnnmigga/core/conf"
+	"github.com/tnnmigga/core/idef"
+	"github.com/tnnmigga/core/infra/zlog"
+	"github.com/tnnmigga/core/utils"
 
 	"reflect"
 )

@@ -7,8 +7,8 @@ import (
 	"runtime/debug"
 	"time"
 
-	"github.com/tnnmigga/nett/conc"
-	"github.com/tnnmigga/nett/infra/zlog"
+	"github.com/tnnmigga/core/conc"
+	"github.com/tnnmigga/core/infra/zlog"
 
 	"github.com/gin-gonic/gin"
 )

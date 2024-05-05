@@ -4,9 +4,9 @@ import (
 	"context"
 	"time"
 
-	"github.com/tnnmigga/nett/conc"
-	"github.com/tnnmigga/nett/idef"
-	"github.com/tnnmigga/nett/mods/basic"
+	"github.com/tnnmigga/core/conc"
+	"github.com/tnnmigga/core/idef"
+	"github.com/tnnmigga/core/mods/basic"
 
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
