@@ -56,7 +56,7 @@ func (s *Server) onStop() {
 	s.before(idef.ServerStateStop, s.record)
 	zlog.Warn("server try to stop")
 	s.waitMsgHandling(time.Minute)
-	conc.WaitGoDone(time.Minute)
+	conc.WaitGoDone(5 * time.Second)
 	for i := len(s.modules) - 1; i >= 0; i-- {
 		m := s.modules[i]
 		utils.ExecAndRecover(m.Stop)

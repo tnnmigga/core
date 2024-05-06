@@ -5,6 +5,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/tnnmigga/core/algorithm"
 	"github.com/tnnmigga/core/infra/zlog"
 	"github.com/tnnmigga/core/utils"
 )
@@ -13,6 +14,7 @@ var (
 	rootCtx, cancelGo = context.WithCancel(context.Background())
 	wg                = &sync.WaitGroup{}
 	wkg               = newWorkerGroup()
+	running           = algorithm.NewCounter[string]()
 )
 
 func newWorkerGroup() *workerGroup {
@@ -93,6 +95,8 @@ func Go[T gocall](fn T) {
 	case func(context.Context):
 		wg.Add(1)
 		go func() {
+			// GoRunMark(utils.FuncName(fn))
+			// defer GoDoneMark(utils.FuncName(fn))
 			defer utils.RecoverPanic()
 			defer wg.Done()
 			f(rootCtx)
@@ -100,6 +104,8 @@ func Go[T gocall](fn T) {
 	case func():
 		wg.Add(1)
 		go func() {
+			// GoRunMark(utils.FuncName(fn))
+			// defer GoDoneMark(utils.FuncName(fn))
 			defer utils.RecoverPanic()
 			defer wg.Done()
 			f()
@@ -127,6 +133,23 @@ func WaitGoDone(maxWaitTime time.Duration) {
 	case <-c:
 		return
 	case <-timer:
+		// PrintCurrentGo()
 		zlog.Errorf("wait goroutine exit timeout")
 	}
+}
+
+func GoRunMark(key string) {
+	running.Change(key, 1)
+}
+
+func GoDoneMark(key string) {
+	running.Change(key, -1)
+}
+
+func PrintCurrentGo() {
+	running.Range(func(s string, i int) {
+		if i > 0 {
+			zlog.Debugf("Go %s: %d", s, i)
+		}
+	})
 }
