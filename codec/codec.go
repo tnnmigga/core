@@ -4,7 +4,6 @@ import (
 	"encoding/binary"
 	"errors"
 	"fmt"
-	"log"
 	"reflect"
 
 	"github.com/tnnmigga/core/infra/zlog"
@@ -96,13 +95,13 @@ func Marshal(v any) []byte {
 	if v0, ok := v.(proto.Message); ok {
 		b, err := proto.Marshal(v0)
 		if err != nil {
-			log.Panic(fmt.Errorf("message encode error %v", err))
+			zlog.Panic(fmt.Errorf("message encode error %v", err))
 		}
 		return b
 	}
 	b, err := bson.Marshal(v)
 	if err != nil {
-		log.Panic(fmt.Errorf("message encode error %v", err))
+		zlog.Panic(fmt.Errorf("message encode error %v", err))
 	}
 	return b
 }
